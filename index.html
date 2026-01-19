@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>THE LAST COACH</title>
+    
+    <meta name="description" content="Your personal fitness tracker - Track progress photos, weight, and achieve your fitness goals">
+    <meta name="theme-color" content="#FF6B35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Last Coach">
+    
+    <style>
+        :root {
+            --primary: #FF6B35;
+            --dark: #1a1a1a;
+            --light: #ffffff;
+            --gray: #f4f4f4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--dark) 100%);
+            min-height: 100vh;
+            color: #333;
+            /* Extra bottom padding for mobile navigation */
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        #app-container {
+            max-width: 500px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: var(--light);
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .page {
+            display: none;
+            padding: 20px;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--primary);
+            color: white;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: -30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+            border-top: 1px solid #eee;
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            flex: 1;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+            padding-bottom: 80px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="app-container">
+        <div id="loginPage" class="page active">
+            <div class="header">
+                <h1>THE LAST COACH</h1>
+                <p>Track your transformation</p>
+            </div>
+            <div class="card">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="password" placeholder="Enter password" required>
+                    </div>
+                    <button type="button" class="btn" onclick="mockLogin()">Sign In</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="dashboardPage" class="page">
+            <h2 style="margin-bottom: 20px;">Welcome Back!</h2>
+            
+            <div id="homeTab" class="tab-content active">
+                <div class="card" style="margin-top: 0;">
+                    <h3>Today's Progress</h3>
+                    <p>Current Weight: 185 lbs</p>
+                </div>
+            </div>
+
+            <div id="photosTab" class="tab-content">
+                <h3>Progress Photos</h3>
+                <div class="card" style="margin-top: 10px; border: 2px dashed #ccc; text-align: center;">
+                    <p>No photos uploaded yet.</p>
+                    <button class="btn">Add Photo</button>
+                </div>
+            </div>
+
+            <div id="settingsTab" class="tab-content">
+                <h3>Settings</h3>
+                <button class="btn" style="background: #666;" onclick="location.reload()">Logout</button>
+            </div>
+
+            <nav class="bottom-nav">
+                <div class="nav-item active" onclick="switchTab('homeTab', this)">
+                    <div>🏠</div>
+                    <span>Home</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('photosTab', this)">
+                    <div>📸</div>
+                    <span>Photos</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('settingsTab', this)">
+                    <div>⚙️</div>
+                    <span>Settings</span>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function switchTab(tabId, el) {
+            // Remove active classes
+            document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(ni => ni.classList.remove('active'));
+            
+            // Set new active
+            document.getElementById(tabId).classList.add('active');
+            el.classList.add('active');
+            
+            // Console log to verify working
+            console.log('Switched to:', tabId);
+        }
+
+        function mockLogin() {
+            // In a real app, you'd verify credentials here
+            showPage('dashboardPage');
+        }
+
+        // Initialize
+        window.onload = function() {
+            console.log('App Initialized');
+            
+            // PWA Service Worker Registration
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('./service-worker.js')
+                .then(() => console.log('SW Registered'))
+                .catch(err => console.log('SW Error:', err));
+            }
+        };
+    </script>
+</body>
+</html>
