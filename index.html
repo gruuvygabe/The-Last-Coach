@@ -246,9 +246,21 @@ function finishOnboarding() {
 ========================================================= */
 function loadDashboard() {
   showPage("dashboardPage");
+
   userName.innerText = currentUser.name;
   userCalories.innerText = currentUser.calories;
   userTDEE.innerText = currentUser.tdee;
+
+  document.getElementById("overview").innerHTML = `
+    <h2>Welcome, ${currentUser.name}</h2>
+    <p><strong>Goal:</strong> ${currentUser.goal.toUpperCase()}</p>
+    <p><strong>Calories:</strong> ${currentUser.calories}</p>
+    <p><strong>TDEE:</strong> ${currentUser.tdee}</p>
+    <p><strong>Training Days:</strong> ${currentUser.workoutDays}/week</p>
+    <p><strong>Program Split:</strong> ${getTrainingSplit(currentUser.workoutDays)}</p>
+    <p class="small">Focus this phase: progressive overload & consistency</p>
+  `;
+
   generateNutritionPlan();
   generateWorkoutPlan();
 }
@@ -354,16 +366,50 @@ const FOODS = [
    NUTRITION ENGINE
 ========================================================= */
 function generateNutritionPlan() {
-  const protein = Math.round(currentUser.weight);
-  const fats = Math.round(currentUser.calories * 0.25 / 9);
-  const carbs = Math.round((currentUser.calories - (protein*4 + fats*9)) / 4);
+  const proteinTarget = Math.round(currentUser.weight);
+  const fatTarget = Math.round(currentUser.calories * 0.25 / 9);
+  const carbTarget = Math.round((currentUser.calories - (proteinTarget*4 + fatTarget*9)) / 4);
+
+  function pickFood(filterFn) {
+    const options = FOODS.filter(filterFn);
+    return options[Math.floor(Math.random() * options.length)];
+  }
+
+  const breakfast = [
+    pickFood(f => f.p >= 8 && f.c > 20),
+    pickFood(f => f.c > 20),
+  ];
+
+  const lunch = [
+    pickFood(f => f.p >= 20),
+    pickFood(f => f.c >= 30),
+    pickFood(f => f.c < 15 && f.p < 10),
+  ];
+
+  const dinner = [
+    pickFood(f => f.p >= 20),
+    pickFood(f => f.c >= 20),
+    pickFood(f => f.c < 15),
+  ];
 
   let html = `
-    <p><strong>Macros:</strong> ${protein}g Protein • ${carbs}g Carbs • ${fats}g Fats</p>
+    <p><strong>Daily Macros:</strong> ${proteinTarget}P / ${carbTarget}C / ${fatTarget}F</p>
+
+    <div class="meal"><strong>🍳 Breakfast</strong><br>
+      ${breakfast.map(f => f.name).join("<br>")}
+    </div>
+
+    <div class="meal"><strong>🥗 Lunch</strong><br>
+      ${lunch.map(f => f.name).join("<br>")}
+    </div>
+
+    <div class="meal"><strong>🍽 Dinner</strong><br>
+      ${dinner.map(f => f.name).join("<br>")}
+    </div>
+
+    <p class="small">Rotate food choices weekly. Portions adjusted to hit macros.</p>
   `;
-  FOODS.forEach(food=>{
-    html += `<div class="meal">${food.name} (${food.cost})</div>`;
-  });
+
   nutritionPlan.innerHTML = html;
 }
 
@@ -448,12 +494,95 @@ const EXERCISES = [
 /* =========================================================
    WORKOUT ENGINE
 ========================================================= */
+function getTrainingSplit(days) {
+  if (days <= 3) return "Full Body";
+  if (days === 4) return "Upper / Lower";
+  return "Push / Pull / Legs";
+}
+
 function generateWorkoutPlan() {
+  const split = getTrainingSplit(currentUser.workoutDays);
+  let days = [];
+
+  if (split === "Full Body") {
+    days = ["Full Body"];
+  } else if (split === "Upper / Lower") {
+    days = ["Upper Body", "Lower Body"];
+  } else {
+    days = ["Push", "Pull", "Legs"];
+  }
+
+  function pick(pattern) {
+    return EXERCISES.filter(e =>
+      e.pattern === pattern &&
+      e.equipment.some(eq => currentUser.equipment.includes(eq))
+    )[0];
+  }
+
   let html = "";
-  EXERCISES.forEach(ex=>{
-    if (ex.equipment.some(eq=>currentUser.equipment.includes(eq))) {
-      html += `<div class="exercise">${ex.name} — 3×8–12</div>`;
+
+  days.forEach(day => {
+    html += `<div class="exercise"><strong>${day}</strong><br>`;
+
+    if (day.includes("Full")) {
+      html += `
+        ${pick("squat").name} – 4x8<br>
+        ${pick("push").name} – 4x8<br>
+        ${pick("pull").name} – 4x10<br>
+        ${pick("hinge").name} – 3x8<br>
+        ${pick("core").name} – 3x45s
+      `;
     }
+
+    if (day === "Upper Body") {
+      html += `
+        ${pick("push").name} – 4x8<br>
+        ${pick("pull").name} – 4x10<br>
+        ${pick("push").name} – 3x10<br>
+        ${pick("pull").name} – 3x12
+      `;
+    }
+
+    if (day === "Lower Body") {
+      html += `
+        ${pick("squat").name} – 4x6<br>
+        ${pick("hinge").name} – 3x8<br>
+        ${pick("lunge").name} – 3x12<br>
+        ${pick("core").name} – 3x45s
+      `;
+    }
+
+    if (day === "Push") {
+      html += `
+        ${pick("push").name} – 4x6<br>
+        ${pick("push").name} – 3x10<br>
+        Triceps Accessory – 3x12
+      `;
+    }
+
+    if (day === "Pull") {
+      html += `
+        ${pick("pull").name} – 4x8<br>
+        ${pick("pull").name} – 3x12<br>
+        Biceps Accessory – 3x12
+      `;
+    }
+
+    if (day === "Legs") {
+      html += `
+        ${pick("squat").name} – 4x6<br>
+        ${pick("hinge").name} – 3x8<br>
+        ${pick("lunge").name} – 3x12
+      `;
+    }
+
+    html += `</div>`;
+  });
+
+  html += `<p class="small">Progression: add 5 lbs or 1 rep when all sets are completed with good form.</p>`;
+
+  workoutPlan.innerHTML = html;
+}
   });
   html += `<p class="small">Progress weekly: +5 lbs or +1 rep per set</p>`;
   workoutPlan.innerHTML = html;
