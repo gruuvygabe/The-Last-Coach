@@ -120,6 +120,28 @@ button.secondary {
       <button class="secondary" onclick="resetWater()">Reset</button>
     </div>
 
+    <!-- WEIGHT TRACKING -->
+<div class="card">
+  <h3>⚖️ Weight Tracking</h3>
+
+  <p>
+    Current Weight:
+    <strong><span id="currentWeight">--</span> lbs</strong>
+  </p>
+
+  <input
+    type="number"
+    id="weightInput"
+    placeholder="Enter today’s weight"
+  >
+
+  <button class="secondary" onclick="logWeight()">Log Weight</button>
+
+  <p class="small">
+    Last entry: <span id="lastWeightDate">--</span>
+  </p>
+</div>
+    
     <p class="small">Goal: 64–128 oz per day</p>
   </div>
 </div>
@@ -292,6 +314,53 @@ function updateWaterUI() {
   const el = document.getElementById("waterCount");
   if (el) el.textContent = loadWater();
 }
+  /* =========================================================
+   WEIGHT TRACKING
+========================================================= */
+
+function getWeightLog() {
+  return JSON.parse(localStorage.getItem("weightLog") || "{}");
+}
+
+function saveWeightLog(log) {
+  localStorage.setItem("weightLog", JSON.stringify(log));
+}
+
+function logWeight() {
+  const input = document.getElementById("weightInput");
+  const value = parseFloat(input.value);
+
+  if (!value || value <= 0) return;
+
+  const log = getWeightLog();
+  const today = new Date().toISOString().split("T")[0];
+
+  log[today] = value;
+  saveWeightLog(log);
+
+  input.value = "";
+  updateWeightUI();
+}
+
+function updateWeightUI() {
+  const log = getWeightLog();
+  const dates = Object.keys(log).sort();
+
+  const weightEl = document.getElementById("currentWeight");
+  const dateEl = document.getElementById("lastWeightDate");
+
+  if (!weightEl || !dateEl) return;
+
+  if (dates.length === 0) {
+    weightEl.textContent = "--";
+    dateEl.textContent = "--";
+    return;
+  }
+
+  const latestDate = dates[dates.length - 1];
+  weightEl.textContent = log[latestDate];
+  dateEl.textContent = latestDate;
+}
   function loadDashboard() {
   showPage("dashboardPage");
 
@@ -312,6 +381,7 @@ function updateWaterUI() {
   generateNutritionPlan();
   generateWorkoutPlan();
   updateWaterUI();
+  updateWeightUI();  
   }
 
 /* =========================================================
