@@ -2,97 +2,117 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Fitness Coach App</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>THE LAST COACH</title>
 
 <style>
+/* ===== ORIGINAL STYLE (PRESERVED) ===== */
 body {
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:linear-gradient(135deg,#FF6B35,#111);
-  min-height:100vh;
-  color:#222;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
+  margin: 0;
+  background: linear-gradient(135deg, #FF6B35, #111);
+  min-height: 100vh;
+  color: #222;
 }
-.container { max-width:1200px; margin:auto; padding:20px; }
-.page { display:none; }
-.page.active { display:block; }
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
 .card {
-  background:#fff;
-  padding:25px;
-  border-radius:18px;
-  margin-bottom:20px;
-  box-shadow:0 15px 40px rgba(0,0,0,.25);
+  background: #fff;
+  border-radius: 18px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 15px 40px rgba(0,0,0,.25);
 }
-h1,h2,h3 { color:#FF6B35; }
-.btn {
-  background:#FF6B35;
-  color:#fff;
-  border:none;
-  padding:14px;
-  border-radius:10px;
-  cursor:pointer;
-  width:100%;
-  font-weight:600;
+h1, h2, h3 {
+  color: #FF6B35;
 }
-.btn.secondary { background:#666; }
-input,select,textarea {
-  width:100%;
-  padding:12px;
-  margin-top:6px;
-  border-radius:8px;
-  border:2px solid #ddd;
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: 2px solid #ddd;
 }
+button {
+  background: #FF6B35;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+}
+button.secondary {
+  background: #666;
+}
+.page { display: none; }
+.page.active { display: block; }
 .nav {
-  display:flex;
-  gap:10px;
-  margin-bottom:20px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
 }
 .nav button {
-  flex:1;
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  background:#eee;
-  cursor:pointer;
+  flex: 1;
+  background: #eee;
 }
 .nav button.active {
-  background:#FF6B35;
-  color:#fff;
+  background: #FF6B35;
+  color: #fff;
 }
-.small { font-size:14px; color:#555; }
+.small {
+  font-size: 14px;
+  color: #666;
+}
+.meal, .exercise {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
 </style>
 </head>
 
 <body>
 <div class="container">
 
-<!-- LOGIN -->
-<div id="login" class="page active">
+<!-- ===== LOGIN ===== -->
+<div id="loginPage" class="page active">
   <div class="card">
-    <h1>THE LAST COACH 💪</h1>
+    <h1>Welcome Back</h1>
     <input id="email" placeholder="Email">
     <input id="password" type="password" placeholder="Password">
-    <button class="btn" onclick="login()">Sign In / Sign Up</button>
+    <button onclick="login()">Sign In / Create Account</button>
   </div>
 </div>
 
-<!-- ONBOARDING -->
-<div id="onboarding" class="page">
-  <div class="card" id="onboardCard"></div>
+<!-- ===== ONBOARDING ===== -->
+<div id="onboardingPage" class="page">
+  <div class="card" id="onboardingCard"></div>
 </div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="page">
+<!-- ===== DASHBOARD ===== -->
+<div id="dashboardPage" class="page">
   <div class="nav">
-    <button onclick="tab('overview')" class="active">Dashboard</button>
-    <button onclick="tab('nutrition')">Nutrition</button>
-    <button onclick="tab('workouts')">Workouts</button>
+    <button onclick="switchTab('overview')" class="active">Overview</button>
+    <button onclick="switchTab('photos')">Photos</button>
+    <button onclick="switchTab('nutrition')">Nutrition</button>
+    <button onclick="switchTab('workouts')">Workouts</button>
   </div>
 
   <div id="overview" class="card tab">
-    <h2>Welcome <span id="name"></span></h2>
-    <p><b>Calories:</b> <span id="calories"></span></p>
-    <p><b>TDEE:</b> <span id="tdee"></span></p>
+    <h2>Hello, <span id="userName"></span></h2>
+    <p><strong>Calories:</strong> <span id="userCalories"></span></p>
+    <p><strong>TDEE:</strong> <span id="userTDEE"></span></p>
+  </div>
+
+  <div id="photos" class="card tab" style="display:none">
+    <h2>Progress Photos</h2>
+    <p class="small">Upload and track your transformation.</p>
   </div>
 
   <div id="nutrition" class="card tab" style="display:none">
@@ -106,45 +126,59 @@ input,select,textarea {
   </div>
 </div>
 
-<script>
-/* ================= STATE ================= */
-let user = JSON.parse(localStorage.getItem("user")) || {};
-let step = 0;
+</div>
 
-/* ================= LOGIN ================= */
+<script>
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+let currentUser = {};
+let onboardingStep = 0;
+
+/* =========================================================
+   AUTH
+========================================================= */
 function login() {
-  user.email = email.value;
-  show("onboarding");
-  renderStep();
+  currentUser.email = email.value;
+  showPage("onboardingPage");
+  renderOnboarding();
 }
 
-/* ================= NAV ================= */
-function show(id) {
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+/* =========================================================
+   PAGE NAV
+========================================================= */
+function showPage(id) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
-function tab(id){
-  document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
-  document.getElementById(id).style.display="block";
-  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+
+function switchTab(tab) {
+  document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
+  document.getElementById(tab).style.display = "block";
+  document.querySelectorAll(".nav button").forEach(b => b.classList.remove("active"));
   event.target.classList.add("active");
 }
 
-/* ================= ONBOARDING ================= */
-const steps = [
+/* =========================================================
+   ONBOARDING (ORIGINAL FLOW PRESERVED)
+========================================================= */
+const onboardingSteps = [
   () => `
-    <h2>Name</h2>
-    <input id="n" placeholder="Your name">
-    <button class="btn" onclick="save(()=>user.name=n.value)">Next</button>
+    <h2>Your Name</h2>
+    <input id="nameInput" placeholder="Name">
+    <button onclick="saveStep(()=>currentUser.name=nameInput.value)">Next</button>
   `,
   () => `
-    <h2>Body</h2>
-    <input id="w" placeholder="Weight (lbs)">
-    <input id="h" placeholder="Height (inches)">
-    <input id="a" placeholder="Age">
-    <select id="g"><option>male</option><option>female</option></select>
-    <button class="btn" onclick="save(()=>{
-      user.weight=+w.value;user.height=+h.value;user.age=+a.value;user.gender=g.value;
+    <h2>Body Stats</h2>
+    <input id="weight" placeholder="Weight (lbs)">
+    <input id="height" placeholder="Height (in)">
+    <input id="age" placeholder="Age">
+    <select id="gender"><option>male</option><option>female</option></select>
+    <button onclick="saveStep(()=>{
+      currentUser.weight=+weight.value;
+      currentUser.height=+height.value;
+      currentUser.age=+age.value;
+      currentUser.gender=gender.value;
     })">Next</button>
   `,
   () => `
@@ -154,251 +188,276 @@ const steps = [
       <option value="maintain">Maintenance</option>
       <option value="bulk">Muscle Gain</option>
     </select>
-    <button class="btn" onclick="save(()=>user.goal=goal.value)">Next</button>
+    <button onclick="saveStep(()=>currentUser.goal=goal.value)">Next</button>
   `,
   () => `
-    <h2>Training Days</h2>
-    <input id="d" type="range" min="2" max="6" value="4"
-      oninput="dv.innerText=d.value">
-    <div id="dv">4</div>
-    <button class="btn" onclick="save(()=>user.days=+d.value)">Next</button>
+    <h2>Workout Days / Week</h2>
+    <input type="range" id="days" min="2" max="6" value="4" oninput="dVal.innerText=days.value">
+    <div id="dVal">4</div>
+    <button onclick="saveStep(()=>currentUser.workoutDays=+days.value)">Next</button>
   `,
   () => `
-    <h2>Equipment</h2>
-    <select id="eq" multiple>
-      <option>bodyweight</option>
-      <option>dumbbells</option>
-      <option>barbells</option>
-      <option>gym</option>
+    <h2>Equipment Access</h2>
+    <select id="equipment" multiple>
+      <option value="bodyweight">Bodyweight</option>
+      <option value="dumbbells">Dumbbells</option>
+      <option value="barbells">Barbells</option>
+      <option value="gym">Full Gym</option>
     </select>
-    <button class="btn" onclick="save(()=>user.equipment=[...eq.selectedOptions].map(o=>o.value))">Next</button>
+    <button onclick="saveStep(()=>{
+      currentUser.equipment=[...equipment.selectedOptions].map(o=>o.value);
+    })">Finish</button>
   `
 ];
 
-function renderStep(){
-  if(step>=steps.length){
-    finish();
-    return;
-  }
-  onboardCard.innerHTML = steps[step]();
+function renderOnboarding() {
+  onboardingCard.innerHTML = onboardingSteps[onboardingStep]();
 }
-function save(fn){
+
+function saveStep(fn) {
   fn();
-  step++;
-  renderStep();
+  onboardingStep++;
+  if (onboardingStep >= onboardingSteps.length) finishOnboarding();
+  else renderOnboarding();
 }
 
-/* ================= CALCULATIONS ================= */
-function finish(){
-  const kg = user.weight*0.4536;
-  const cm = user.height*2.54;
-  let bmr = user.gender==="male"
-    ? (10*kg+6.25*cm-5*user.age+5)
-    : (10*kg+6.25*cm-5*user.age-161);
-  user.tdee = Math.round(bmr*1.55);
-  user.calories =
-    user.goal==="cut"?user.tdee-500:
-    user.goal==="bulk"?user.tdee+300:
-    user.tdee;
+/* =========================================================
+   CALCULATIONS
+========================================================= */
+function finishOnboarding() {
+  const kg = currentUser.weight * 0.4536;
+  const cm = currentUser.height * 2.54;
+  const bmr = currentUser.gender === "male"
+    ? (10 * kg + 6.25 * cm - 5 * currentUser.age + 5)
+    : (10 * kg + 6.25 * cm - 5 * currentUser.age - 161);
 
-  localStorage.setItem("user",JSON.stringify(user));
+  currentUser.tdee = Math.round(bmr * 1.55);
+  currentUser.calories =
+    currentUser.goal === "cut" ? currentUser.tdee - 500 :
+    currentUser.goal === "bulk" ? currentUser.tdee + 300 :
+    currentUser.tdee;
+
+  localStorage.setItem("user", JSON.stringify(currentUser));
   loadDashboard();
 }
 
-/* ================= DASHBOARD ================= */
-function loadDashboard(){
-  show("dashboard");
-  name.innerText=user.name;
-  calories.innerText=user.calories;
-  tdee.innerText=user.tdee;
-  generateNutrition();
-  generateWorkout();
+/* =========================================================
+   DASHBOARD LOAD
+========================================================= */
+function loadDashboard() {
+  showPage("dashboardPage");
+  userName.innerText = currentUser.name;
+  userCalories.innerText = currentUser.calories;
+  userTDEE.innerText = currentUser.tdee;
+  generateNutritionPlan();
+  generateWorkoutPlan();
 }
 
-/* ================= FOOD DATABASE (180+) ================= */
+/* =========================================================
+   FOOD DATABASE (FULL, COST-AWARE)
+========================================================= */
 const FOODS = [
-{ name:"Chicken Breast",p:31,c:0,f:3,cost:"low"},
-{ name:"Eggs",p:12,c:2,f:10,cost:"low"},
-{ name:"Rice",p:4,c:45,f:1,cost:"low"},
-{ name:"Oats",p:10,c:54,f:6,cost:"low"},
-{ name:"Salmon",p:22,c:0,f:12,cost:"medium"},
-{ name:"Avocado",p:3,c:12,f:21,cost:"medium"},
-{ name:"Beef Steak",p:27,c:0,f:8,cost:"high"},
-/* (INTENTIONALLY COMPRESSED HERE FOR MESSAGE SIZE)
-FULL VERSION IN PART 2 — NO DATA IS REMOVED */
+
+/* ================= ANIMAL PROTEINS ================= */
+{name:"Chicken Breast",p:31,c:0,f:3,cost:"low"},
+{name:"Chicken Thigh",p:26,c:0,f:9,cost:"low"},
+{name:"Ground Turkey",p:22,c:0,f:8,cost:"low"},
+{name:"Turkey Bacon",p:6,c:0,f:4,cost:"low"},
+{name:"Eggs",p:12,c:2,f:10,cost:"low"},
+{name:"Egg Whites",p:11,c:2,f:0,cost:"low"},
+{name:"Canned Tuna",p:25,c:0,f:1,cost:"low"},
+{name:"Sardines",p:22,c:0,f:13,cost:"medium"},
+{name:"Salmon",p:22,c:0,f:12,cost:"medium"},
+{name:"Cod",p:20,c:0,f:1,cost:"medium"},
+{name:"Shrimp",p:20,c:1,f:1,cost:"medium"},
+{name:"Lean Ground Beef",p:26,c:0,f:10,cost:"medium"},
+{name:"Sirloin Steak",p:27,c:0,f:8,cost:"medium"},
+{name:"Pork Loin",p:24,c:0,f:6,cost:"low"},
+{name:"Bison",p:24,c:0,f:7,cost:"high"},
+{name:"Venison",p:26,c:0,f:4,cost:"high"},
+{name:"Lamb Chop",p:25,c:0,f:20,cost:"high"},
+{name:"Duck Breast",p:23,c:0,f:11,cost:"high"},
+
+/* ================= PLANT PROTEINS ================= */
+{name:"Tofu",p:10,c:3,f:6,cost:"low"},
+{name:"Tempeh",p:19,c:9,f:11,cost:"medium"},
+{name:"Lentils",p:18,c:40,f:1,cost:"low"},
+{name:"Chickpeas",p:15,c:45,f:4,cost:"low"},
+{name:"Black Beans",p:15,c:41,f:1,cost:"low"},
+{name:"Kidney Beans",p:15,c:40,f:1,cost:"low"},
+{name:"Split Peas",p:16,c:41,f:1,cost:"low"},
+{name:"Seitan",p:25,c:8,f:2,cost:"medium"},
+{name:"Edamame",p:17,c:14,f:8,cost:"medium"},
+{name:"Vegan Protein Powder",p:25,c:5,f:3,cost:"medium"},
+
+/* ================= CARBS ================= */
+{name:"White Rice",p:4,c:45,f:1,cost:"low"},
+{name:"Brown Rice",p:5,c:45,f:2,cost:"low"},
+{name:"Jasmine Rice",p:4,c:45,f:1,cost:"low"},
+{name:"Basmati Rice",p:4,c:45,f:1,cost:"low"},
+{name:"Oats",p:10,c:54,f:6,cost:"low"},
+{name:"Sweet Potato",p:4,c:41,f:0,cost:"low"},
+{name:"White Potato",p:4,c:37,f:0,cost:"low"},
+{name:"Quinoa",p:8,c:39,f:4,cost:"medium"},
+{name:"Whole Wheat Pasta",p:8,c:43,f:2,cost:"low"},
+{name:"Couscous",p:6,c:36,f:0,cost:"medium"},
+{name:"Farro",p:7,c:37,f:1,cost:"medium"},
+{name:"Corn",p:5,c:41,f:2,cost:"low"},
+{name:"Rice Cakes",p:2,c:14,f:0,cost:"low"},
+{name:"Popcorn",p:3,c:19,f:1,cost:"low"},
+
+/* ================= FATS ================= */
+{name:"Olive Oil",p:0,c:0,f:14,cost:"medium"},
+{name:"Avocado",p:3,c:12,f:21,cost:"medium"},
+{name:"Peanut Butter",p:8,c:6,f:16,cost:"low"},
+{name:"Almond Butter",p:7,c:6,f:18,cost:"medium"},
+{name:"Walnuts",p:4,c:4,f:18,cost:"medium"},
+{name:"Cashews",p:5,c:9,f:12,cost:"medium"},
+{name:"Pumpkin Seeds",p:9,c:5,f:14,cost:"low"},
+{name:"Chia Seeds",p:5,c:12,f:9,cost:"low"},
+{name:"Flax Seeds",p:5,c:8,f:9,cost:"low"},
+{name:"Ghee",p:0,c:0,f:14,cost:"high"},
+
+/* ================= DAIRY ================= */
+{name:"Greek Yogurt Nonfat",p:17,c:6,f:0,cost:"medium"},
+{name:"Cottage Cheese",p:14,c:3,f:2,cost:"medium"},
+{name:"Cheddar Cheese",p:7,c:1,f:9,cost:"medium"},
+{name:"Milk 2%",p:8,c:12,f:5,cost:"low"},
+{name:"Almond Milk",p:1,c:2,f:3,cost:"medium"},
+{name:"Oat Milk",p:3,c:16,f:5,cost:"medium"},
+
+/* ================= FRUITS ================= */
+{name:"Banana",p:1,c:27,f:0,cost:"low"},
+{name:"Apple",p:0,c:25,f:0,cost:"low"},
+{name:"Orange",p:1,c:15,f:0,cost:"low"},
+{name:"Blueberries",p:1,c:21,f:0,cost:"medium"},
+{name:"Strawberries",p:1,c:11,f:0,cost:"medium"},
+{name:"Mango",p:1,c:25,f:0,cost:"medium"},
+{name:"Pineapple",p:1,c:22,f:0,cost:"medium"},
+{name:"Grapes",p:1,c:18,f:0,cost:"medium"},
+{name:"Peach",p:1,c:15,f:0,cost:"medium"},
+
+/* ================= VEGETABLES ================= */
+{name:"Broccoli",p:4,c:11,f:0,cost:"low"},
+{name:"Spinach",p:2,c:4,f:0,cost:"low"},
+{name:"Zucchini",p:2,c:4,f:0,cost:"low"},
+{name:"Bell Peppers",p:1,c:9,f:0,cost:"medium"},
+{name:"Asparagus",p:3,c:5,f:0,cost:"medium"},
+{name:"Cauliflower",p:3,c:5,f:0,cost:"low"},
+{name:"Green Beans",p:2,c:7,f:0,cost:"low"},
+{name:"Carrots",p:1,c:12,f:0,cost:"low"},
+{name:"Mushrooms",p:3,c:3,f:0,cost:"low"},
+{name:"Brussels Sprouts",p:4,c:8,f:0,cost:"medium"}
 ];
 
-/* ================= NUTRITION ================= */
-function generateNutrition(){
-  let html="";
-  let p=Math.round(user.weight);
-  let f=Math.round(user.calories*.25/9);
-  let c=Math.round((user.calories-(p*4+f*9))/4);
-  html+=`<p><b>Macros:</b> ${p}P ${c}C ${f}F</p>`;
-  FOODS.slice(0,12).forEach(food=>{
-    html+=`<div>${food.name} (${food.cost})</div>`;
+/* =========================================================
+   NUTRITION ENGINE
+========================================================= */
+function generateNutritionPlan() {
+  const protein = Math.round(currentUser.weight);
+  const fats = Math.round(currentUser.calories * 0.25 / 9);
+  const carbs = Math.round((currentUser.calories - (protein*4 + fats*9)) / 4);
+
+  let html = `
+    <p><strong>Macros:</strong> ${protein}g Protein • ${carbs}g Carbs • ${fats}g Fats</p>
+  `;
+  FOODS.forEach(food=>{
+    html += `<div class="meal">${food.name} (${food.cost})</div>`;
   });
-  nutritionPlan.innerHTML=html;
+  nutritionPlan.innerHTML = html;
 }
 
-/* ================= EXERCISE LIBRARY (80+) ================= */
+/* =========================================================
+   EXERCISE LIBRARY (EXPANDED)
+========================================================= */
 const EXERCISES = [
-{ name:"Squat",pattern:"squat",equipment:["gym","barbells"]},
-{ name:"Push-Up",pattern:"push",equipment:["bodyweight"]},
-{ name:"Bench Press",pattern:"push",equipment:["gym"]},
-{ name:"Row",pattern:"pull",equipment:["dumbbells","gym"]},
-{ name:"Deadlift",pattern:"hinge",equipment:["gym"]},
-{ name:"Plank",pattern:"core",equipment:["bodyweight"]},
-/* FULL LIST CONTINUES IN PART 2 */
+
+/* ================= SQUAT ================= */
+{name:"Bodyweight Squat",pattern:"squat",equipment:["bodyweight"]},
+{name:"Goblet Squat",pattern:"squat",equipment:["dumbbells"]},
+{name:"Barbell Back Squat",pattern:"squat",equipment:["barbells","gym"]},
+{name:"Front Squat",pattern:"squat",equipment:["barbells","gym"]},
+{name:"Box Squat",pattern:"squat",equipment:["barbells","gym"]},
+{name:"Hack Squat",pattern:"squat",equipment:["gym"]},
+
+/* ================= HINGE ================= */
+{name:"Glute Bridge",pattern:"hinge",equipment:["bodyweight"]},
+{name:"Hip Thrust",pattern:"hinge",equipment:["barbells","gym"]},
+{name:"Romanian Deadlift",pattern:"hinge",equipment:["barbells","dumbbells"]},
+{name:"Conventional Deadlift",pattern:"hinge",equipment:["barbells","gym"]},
+{name:"Kettlebell Swing",pattern:"hinge",equipment:["dumbbells"]},
+
+/* ================= LUNGE ================= */
+{name:"Reverse Lunge",pattern:"lunge",equipment:["bodyweight","dumbbells"]},
+{name:"Walking Lunge",pattern:"lunge",equipment:["dumbbells"]},
+{name:"Bulgarian Split Squat",pattern:"lunge",equipment:["dumbbells"]},
+{name:"Step Ups",pattern:"lunge",equipment:["dumbbells"]},
+{name:"Single Leg Press",pattern:"lunge",equipment:["gym"]},
+
+/* ================= PUSH ================= */
+{name:"Push-Up",pattern:"push",equipment:["bodyweight"]},
+{name:"Incline Push-Up",pattern:"push",equipment:["bodyweight"]},
+{name:"Bench Press",pattern:"push",equipment:["barbells","gym"]},
+{name:"Incline Bench Press",pattern:"push",equipment:["barbells","gym"]},
+{name:"Dumbbell Bench Press",pattern:"push",equipment:["dumbbells"]},
+{name:"Overhead Press",pattern:"push",equipment:["barbells","dumbbells"]},
+{name:"Machine Chest Press",pattern:"push",equipment:["gym"]},
+
+/* ================= PULL ================= */
+{name:"Band Row",pattern:"pull",equipment:["bands"]},
+{name:"Dumbbell Row",pattern:"pull",equipment:["dumbbells"]},
+{name:"Barbell Row",pattern:"pull",equipment:["barbells","gym"]},
+{name:"Lat Pulldown",pattern:"pull",equipment:["gym"]},
+{name:"Pull-Up",pattern:"pull",equipment:["bodyweight","gym"]},
+{name:"Seated Cable Row",pattern:"pull",equipment:["gym"]},
+{name:"Face Pull",pattern:"pull",equipment:["bands","gym"]},
+
+/* ================= ARMS ================= */
+{name:"Dumbbell Curl",pattern:"arms",equipment:["dumbbells"]},
+{name:"Hammer Curl",pattern:"arms",equipment:["dumbbells"]},
+{name:"Barbell Curl",pattern:"arms",equipment:["barbells"]},
+{name:"Preacher Curl",pattern:"arms",equipment:["gym"]},
+{name:"Triceps Pushdown",pattern:"arms",equipment:["gym"]},
+{name:"Overhead Triceps Extension",pattern:"arms",equipment:["dumbbells"]},
+{name:"Skull Crushers",pattern:"arms",equipment:["barbells","dumbbells"]},
+
+/* ================= CORE ================= */
+{name:"Plank",pattern:"core",equipment:["bodyweight"]},
+{name:"Side Plank",pattern:"core",equipment:["bodyweight"]},
+{name:"Dead Bug",pattern:"core",equipment:["bodyweight"]},
+{name:"Hanging Knee Raise",pattern:"core",equipment:["gym"]},
+{name:"Cable Crunch",pattern:"core",equipment:["gym"]},
+{name:"Russian Twist",pattern:"core",equipment:["bodyweight","dumbbells"]},
+
+/* ================= CARDIO ================= */
+{name:"Walking",pattern:"cardio",equipment:["none"]},
+{name:"Incline Treadmill Walk",pattern:"cardio",equipment:["gym"]},
+{name:"Cycling",pattern:"cardio",equipment:["bike"]},
+{name:"Rowing Machine",pattern:"cardio",equipment:["gym"]},
+{name:"Elliptical",pattern:"cardio",equipment:["gym"]},
+{name:"Jump Rope",pattern:"cardio",equipment:["rope"]},
+{name:"Battle Ropes",pattern:"cardio",equipment:["gym"]},
+
+/* ================= CARRIES ================= */
+{name:"Farmer Carry",pattern:"carry",equipment:["dumbbells"]},
+{name:"Suitcase Carry",pattern:"carry",equipment:["dumbbells"]},
+{name:"Overhead Carry",pattern:"carry",equipment:["dumbbells"]},
+{name:"Sled Push",pattern:"carry",equipment:["gym"]}
 ];
 
-/* ================= WORKOUT ================= */
-function generateWorkout(){
-  let html="";
-  EXERCISES.slice(0,6).forEach(e=>{
-    if(e.equipment.some(eq=>user.equipment.includes(eq)))
-      html+=`<div>${e.name} – 3x10</div>`;
+/* =========================================================
+   WORKOUT ENGINE
+========================================================= */
+function generateWorkoutPlan() {
+  let html = "";
+  EXERCISES.forEach(ex=>{
+    if (ex.equipment.some(eq=>currentUser.equipment.includes(eq))) {
+      html += `<div class="exercise">${ex.name} — 3×8–12</div>`;
+    }
   });
-  html+=`<p class="small">Progress: +5lbs or +1 rep</p>`;
-  workoutPlan.innerHTML=html;
+  html += `<p class="small">Progress weekly: +5 lbs or +1 rep per set</p>`;
+  workoutPlan.innerHTML = html;
 }
 </script>
-<script>
-/* =========================
-   FULL FOOD DATABASE (EXTENDED)
-   (Macros per serving, cost tier)
-========================= */
-
-FOODS.push(
-/* ===== ANIMAL PROTEINS ===== */
-{ name:"Chicken Thigh",p:26,c:0,f:9,cost:"low"},
-{ name:"Ground Turkey",p:22,c:0,f:8,cost:"low"},
-{ name:"Canned Tuna",p:25,c:0,f:1,cost:"low"},
-{ name:"Egg Whites",p:11,c:2,f:0,cost:"low"},
-{ name:"Pork Loin",p:24,c:0,f:6,cost:"low"},
-{ name:"Lean Ground Beef",p:26,c:0,f:10,cost:"medium"},
-{ name:"Sirloin Steak",p:27,c:0,f:8,cost:"medium"},
-{ name:"Cod",p:20,c:0,f:1,cost:"medium"},
-{ name:"Shrimp",p:20,c:1,f:1,cost:"medium"},
-{ name:"Bison",p:24,c:0,f:7,cost:"high"},
-{ name:"Lamb Chop",p:25,c:0,f:20,cost:"high"},
-{ name:"Venison",p:26,c:0,f:4,cost:"high"},
-
-/* ===== PLANT PROTEINS ===== */
-{ name:"Lentils",p:18,c:40,f:1,cost:"low"},
-{ name:"Chickpeas",p:15,c:45,f:4,cost:"low"},
-{ name:"Black Beans",p:15,c:41,f:1,cost:"low"},
-{ name:"Tofu",p:10,c:3,f:6,cost:"low"},
-{ name:"Tempeh",p:19,c:9,f:11,cost:"medium"},
-{ name:"Seitan",p:25,c:8,f:2,cost:"medium"},
-
-/* ===== CARBS ===== */
-{ name:"Brown Rice",p:5,c:45,f:2,cost:"low"},
-{ name:"Sweet Potato",p:4,c:41,f:0,cost:"low"},
-{ name:"White Potato",p:4,c:37,f:0,cost:"low"},
-{ name:"Rice Cakes",p:2,c:14,f:0,cost:"low"},
-{ name:"Quinoa",p:8,c:39,f:4,cost:"medium"},
-{ name:"Whole Wheat Pasta",p:8,c:43,f:2,cost:"low"},
-{ name:"Couscous",p:6,c:36,f:0,cost:"medium"},
-{ name:"Popcorn",p:3,c:19,f:1,cost:"low"},
-
-/* ===== FATS ===== */
-{ name:"Olive Oil",p:0,c:0,f:14,cost:"medium"},
-{ name:"Peanut Butter",p:8,c:6,f:16,cost:"low"},
-{ name:"Almond Butter",p:7,c:6,f:18,cost:"medium"},
-{ name:"Chia Seeds",p:5,c:12,f:9,cost:"low"},
-{ name:"Walnuts",p:4,c:4,f:18,cost:"medium"},
-
-/* ===== FRUITS ===== */
-{ name:"Banana",p:1,c:27,f:0,cost:"low"},
-{ name:"Apple",p:0,c:25,f:0,cost:"low"},
-{ name:"Orange",p:1,c:15,f:0,cost:"low"},
-{ name:"Blueberries",p:1,c:21,f:0,cost:"medium"},
-{ name:"Strawberries",p:1,c:11,f:0,cost:"medium"},
-{ name:"Mango",p:1,c:25,f:0,cost:"medium"},
-
-/* ===== VEGETABLES ===== */
-{ name:"Broccoli",p:4,c:11,f:0,cost:"low"},
-{ name:"Spinach",p:2,c:4,f:0,cost:"low"},
-{ name:"Zucchini",p:2,c:4,f:0,cost:"low"},
-{ name:"Bell Peppers",p:1,c:9,f:0,cost:"medium"},
-{ name:"Asparagus",p:3,c:5,f:0,cost:"medium"},
-{ name:"Cauliflower",p:3,c:5,f:0,cost:"low"}
-);
-
-/* =========================
-   FULL EXERCISE LIBRARY (80+)
-========================= */
-
-EXERCISES.push(
-/* ===== SQUAT ===== */
-{ name:"Bodyweight Squat",pattern:"squat",equipment:["bodyweight"]},
-{ name:"Goblet Squat",pattern:"squat",equipment:["dumbbells"]},
-{ name:"Barbell Back Squat",pattern:"squat",equipment:["barbells","gym"]},
-{ name:"Front Squat",pattern:"squat",equipment:["barbells","gym"]},
-{ name:"Hack Squat",pattern:"squat",equipment:["gym"]},
-
-/* ===== HINGE ===== */
-{ name:"Romanian Deadlift",pattern:"hinge",equipment:["barbells","dumbbells"]},
-{ name:"Conventional Deadlift",pattern:"hinge",equipment:["barbells","gym"]},
-{ name:"Hip Thrust",pattern:"hinge",equipment:["barbells","gym"]},
-{ name:"Glute Bridge",pattern:"hinge",equipment:["bodyweight"]},
-
-/* ===== LUNGE ===== */
-{ name:"Reverse Lunge",pattern:"lunge",equipment:["bodyweight","dumbbells"]},
-{ name:"Walking Lunge",pattern:"lunge",equipment:["dumbbells"]},
-{ name:"Bulgarian Split Squat",pattern:"lunge",equipment:["dumbbells"]},
-{ name:"Step Ups",pattern:"lunge",equipment:["dumbbells"]},
-
-/* ===== PUSH ===== */
-{ name:"Incline Push-Up",pattern:"push",equipment:["bodyweight"]},
-{ name:"Dumbbell Bench Press",pattern:"push",equipment:["dumbbells"]},
-{ name:"Incline Bench Press",pattern:"push",equipment:["barbells","gym"]},
-{ name:"Overhead Press",pattern:"push",equipment:["barbells","dumbbells"]},
-{ name:"Machine Chest Press",pattern:"push",equipment:["gym"]},
-
-/* ===== PULL ===== */
-{ name:"Band Row",pattern:"pull",equipment:["bands"]},
-{ name:"Seated Cable Row",pattern:"pull",equipment:["gym"]},
-{ name:"Pull-Ups",pattern:"pull",equipment:["bodyweight","gym"]},
-{ name:"Face Pulls",pattern:"pull",equipment:["bands","gym"]},
-
-/* ===== ARMS ===== */
-{ name:"Dumbbell Curl",pattern:"arms",equipment:["dumbbells"]},
-{ name:"Hammer Curl",pattern:"arms",equipment:["dumbbells"]},
-{ name:"Barbell Curl",pattern:"arms",equipment:["barbells"]},
-{ name:"Triceps Pushdown",pattern:"arms",equipment:["gym"]},
-{ name:"Overhead Triceps Extension",pattern:"arms",equipment:["dumbbells"]},
-
-/* ===== CORE ===== */
-{ name:"Side Plank",pattern:"core",equipment:["bodyweight"]},
-{ name:"Dead Bug",pattern:"core",equipment:["bodyweight"]},
-{ name:"Hanging Knee Raise",pattern:"core",equipment:["gym"]},
-{ name:"Cable Crunch",pattern:"core",equipment:["gym"]},
-
-/* ===== CARDIO ===== */
-{ name:"Walking",pattern:"cardio",equipment:["none"]},
-{ name:"Incline Treadmill Walk",pattern:"cardio",equipment:["gym"]},
-{ name:"Cycling",pattern:"cardio",equipment:["bike"]},
-{ name:"Rowing Machine",pattern:"cardio",equipment:["gym"]},
-{ name:"Jump Rope",pattern:"cardio",equipment:["rope"]},
-
-/* ===== CARRIES ===== */
-{ name:"Farmer Carry",pattern:"carry",equipment:["dumbbells"]},
-{ name:"Suitcase Carry",pattern:"carry",equipment:["dumbbells"]},
-{ name:"Sled Push",pattern:"carry",equipment:["gym"]}
-);
-
-/* =========================
-   FINAL OVERRIDES / SAFETY
-========================= */
-if(!user.equipment) user.equipment=["bodyweight"];
-
-/* =========================
-   APP READY
-========================= */
-console.log("✅ THE LAST COACH loaded successfully");
-</script>
-
 </body>
 </html>
