@@ -2,81 +2,49 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Coaching App</title>
+<title>Coaching Platform</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-  background: linear-gradient(135deg, #FF6B35, #111);
-  min-height: 100vh;
-  color: #222;
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:linear-gradient(135deg,#FF6B35,#111);
+  min-height:100vh;
 }
-.container {
-  max-width: 1100px;
-  margin: auto;
-  padding: 20px;
+.container{max-width:1200px;margin:auto;padding:20px}
+.card{
+  background:#fff;border-radius:18px;padding:25px;margin-bottom:20px;
+  box-shadow:0 15px 40px rgba(0,0,0,.25)
 }
-.card {
-  background: #fff;
-  border-radius: 18px;
-  padding: 25px;
-  margin-bottom: 20px;
-  box-shadow: 0 15px 40px rgba(0,0,0,.25);
+h1,h2,h3,h4{color:#FF6B35;margin-top:0}
+.page{display:none}.page.active{display:block}
+button{
+  width:100%;padding:14px;border:none;border-radius:12px;
+  background:#FF6B35;color:#fff;font-weight:600;cursor:pointer
 }
-h1,h2,h3 { color:#FF6B35; }
-.page { display:none; }
-.page.active { display:block; }
-button {
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:12px;
-  background:#FF6B35;
-  color:#fff;
-  font-weight:600;
-  cursor:pointer;
+button.secondary{background:#666}
+button.small{padding:8px;font-size:14px;margin-top:6px}
+input,select,textarea{
+  width:100%;padding:12px;margin-top:6px;
+  border-radius:10px;border:2px solid #ddd
 }
-button.secondary { background:#666; }
-button.small { padding:8px; font-size:14px; margin-top:6px; }
-input, select {
-  width:100%;
-  padding:12px;
-  margin-top:8px;
-  border-radius:10px;
-  border:2px solid #ddd;
+.nav{display:flex;gap:10px;margin-bottom:20px}
+.nav button{background:#eee}
+.nav button.active{background:#FF6B35;color:#fff}
+.meal,.exercise{
+  background:#f8f9fa;padding:15px;border-radius:12px;margin-bottom:12px
 }
-.nav {
-  display:flex;
-  gap:10px;
-  margin-bottom:20px;
+.small{font-size:14px;color:#666}
+.week{border-left:4px solid #FF6B35;padding-left:15px;margin-bottom:25px}
+.badge{
+  display:inline-block;padding:6px 10px;
+  background:#eee;border-radius:10px;margin-right:6px
 }
-.nav button {
-  background:#eee;
-}
-.nav button.active {
-  background:#FF6B35;
-  color:#fff;
-}
-.meal, .exercise {
-  background:#f8f9fa;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:10px;
-}
-.small { font-size:14px; color:#666; }
-.badge {
-  display:inline-block;
-  padding:6px 10px;
-  background:#eee;
-  border-radius:10px;
-  margin-right:6px;
-}
-.week {
-  border-left: 4px solid #FF6B35;
-  padding-left: 15px;
-  margin-bottom: 20px;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px
 }
 </style>
 </head>
@@ -87,7 +55,7 @@ input, select {
 <!-- LOGIN -->
 <div id="loginPage" class="page active">
   <div class="card">
-    <h1>Welcome</h1>
+    <h1>Coaching Platform</h1>
     <input id="email" placeholder="Email">
     <button onclick="login()">Start</button>
   </div>
@@ -114,306 +82,270 @@ input, select {
 </div>
 
 <script>
-/* =====================================================
-   GLOBAL STATE
-===================================================== */
-let user = {};
-let step = 0;
+/* ===================== STATE ===================== */
+let user={},step=0;
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const load=k=>JSON.parse(localStorage.getItem(k)||"null");
+const today=()=>new Date().toISOString().split("T")[0];
 
-/* =====================================================
-   LOGIN / NAV
-===================================================== */
-function login() {
-  showPage("onboardingPage");
-  renderStep();
-}
-function showPage(id) {
+/* ===================== LOGIN / NAV ===================== */
+function login(){show("onboardingPage");renderStep();}
+function show(id){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
-function switchTab(id) {
+function switchTab(id){
   document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
   document.getElementById(id).style.display="block";
   document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
   event.target.classList.add("active");
 }
 
-/* =====================================================
-   ONBOARDING
-===================================================== */
-const steps = [
-()=>`
-<h2>Your Name</h2>
-<input id="n">
-<button onclick="save(()=>user.name=n.value)">Next</button>`,
-()=>`
-<h2>Stats</h2>
-<input id="w" placeholder="Weight (lbs)">
-<input id="h" placeholder="Height (in)">
-<input id="a" placeholder="Age">
-<select id="g"><option>male</option><option>female</option></select>
-<button onclick="save(()=>{
-user.weight=+w.value;
-user.height=+h.value;
-user.age=+a.value;
-user.gender=g.value;
+/* ===================== ONBOARDING ===================== */
+const steps=[
+()=>`<h2>Name</h2><input id=n><button onclick="next(()=>user.name=n.value)">Next</button>`,
+()=>`<h2>Stats</h2>
+<input id=w placeholder="Weight (lbs)">
+<input id=h placeholder="Height (in)">
+<input id=a placeholder="Age">
+<select id=g><option>male</option><option>female</option></select>
+<button onclick="next(()=>{
+user.weight=+w.value;user.height=+h.value;user.age=+a.value;user.gender=g.value
 })">Next</button>`,
-()=>`
-<h2>Goal</h2>
-<select id="goal">
-<option value="cut">Fat Loss</option>
-<option value="maintain">Maintain</option>
-<option value="bulk">Muscle Gain</option>
+()=>`<h2>Goal</h2>
+<select id=goal>
+<option value=cut>Fat Loss</option>
+<option value=maintain>Maintain</option>
+<option value=bulk>Muscle Gain</option>
 </select>
-<button onclick="save(()=>user.goal=goal.value)">Next</button>`,
-()=>`
-<h2>Training Days</h2>
-<input type="range" min="2" max="6" value="4" id="d" oninput="dv.innerText=d.value">
-<div id="dv">4</div>
-<button onclick="save(()=>user.days=+d.value)">Next</button>`,
-()=>`
-<h2>Equipment</h2>
-<select id="eq" multiple>
-<option value="bodyweight">Bodyweight</option>
-<option value="dumbbells">Dumbbells</option>
-<option value="barbells">Barbells</option>
-<option value="gym">Full Gym</option>
+<button onclick="next(()=>user.goal=goal.value)">Next</button>`,
+()=>`<h2>Training Days</h2>
+<input type=range min=2 max=6 value=4 id=d oninput=dv.innerText=d.value>
+<div id=dv>4</div>
+<button onclick="next(()=>user.days=+d.value)">Next</button>`,
+()=>`<h2>Equipment</h2>
+<select id=eq multiple>
+<option value=bodyweight>Bodyweight</option>
+<option value=dumbbells>Dumbbells</option>
+<option value=barbells>Barbells</option>
+<option value=gym>Full Gym</option>
 </select>
-<button onclick="save(()=>user.equipment=[...eq.selectedOptions].map(o=>o.value))">Finish</button>`
+<button onclick="next(()=>user.equipment=[...eq.selectedOptions].map(o=>o.value))">Finish</button>`
 ];
-function renderStep(){ onboardingCard.innerHTML=steps[step](); }
-function save(fn){ fn(); step++; step>=steps.length?finish():renderStep(); }
+function renderStep(){onboardingCard.innerHTML=steps[step]();}
+function next(fn){fn();step++;step>=steps.length?finish():renderStep();}
 
-/* =====================================================
-   CALCULATIONS
-===================================================== */
+/* ===================== CALCS ===================== */
 function finish(){
-  const kg=user.weight*0.4536;
-  const cm=user.height*2.54;
+  const kg=user.weight*0.4536,cm=user.height*2.54;
   const bmr=user.gender==="male"
     ?10*kg+6.25*cm-5*user.age+5
     :10*kg+6.25*cm-5*user.age-161;
   user.tdee=Math.round(bmr*1.55);
   user.calories=user.goal==="cut"?user.tdee-500:user.goal==="bulk"?user.tdee+300:user.tdee;
-  user.startDate=new Date().toISOString().split("T")[0];
-  localStorage.setItem("user",JSON.stringify(user));
-  generateMonthlyMealPlan();
+  user.start=today();
+  save("user",user);
+  generateMealPlan();
+  show("dashboardPage");
   loadDashboard();
 }
 
-/* =====================================================
-   DASHBOARD
-===================================================== */
-function split(days){
-  if(days<=3) return "Full Body";
-  if(days===4) return "Upper / Lower";
+/* ===================== DASHBOARD ===================== */
+function split(){
+  if(user.days<=3) return "Full Body";
+  if(user.days===4) return "Upper / Lower";
   return "Push / Pull / Legs";
 }
 function loadDashboard(){
-  showPage("dashboardPage");
-  overview.innerHTML=`
-  <h2>Hello, ${user.name}</h2>
-  <span class="badge">Start: ${user.startDate}</span>
-  <span class="badge">${user.goal.toUpperCase()}</span>
-  <p><strong>Calories:</strong> ${user.calories}</p>
-  <p><strong>TDEE:</strong> ${user.tdee}</p>
-  <p><strong>Training:</strong> ${split(user.days)}</p>
+overview.innerHTML=`
+<h2>${user.name}</h2>
+<span class=badge>Start ${user.start}</span>
+<span class=badge>${user.goal.toUpperCase()}</span>
 
-  <div class="meal">
-    <h3>💧 Water</h3>
-    <p><span id="waterCount">0</span> oz</p>
-    <button class="secondary small" onclick="addWater(8)">+8 oz</button>
-  </div>
+<div class=grid>
+<div><strong>Calories</strong><br>${user.calories}</div>
+<div><strong>TDEE</strong><br>${user.tdee}</div>
+<div><strong>Split</strong><br>${split()}</div>
+</div>
 
-  <div class="meal">
-    <h3>⚖️ Weight</h3>
-    <input id="weightInput" placeholder="Today's weight">
-    <button class="secondary small" onclick="logWeight()">Log</button>
-    <p class="small">Current: <span id="currentWeight">--</span></p>
-  </div>
-  `;
-  updateWaterUI();
-  updateWeightUI();
-  renderNutrition();
-  renderWorkout();
+<div class=meal>
+<h3>💧 Water</h3>
+<p><span id=water>${load("water")?.[today()]||0}</span> oz</p>
+<button class="secondary small" onclick="addWater(8)">+8 oz</button>
+</div>
+
+<div class=meal>
+<h3>⚖️ Weight</h3>
+<input id=weightInput placeholder="Today's weight">
+<button class="secondary small" onclick="logWeight()">Log</button>
+<p class=small>Current: <span id=currentWeight>${latestWeight()||"--"}</span></p>
+</div>`;
+renderNutrition();
+renderWorkouts();
 }
 
-/* =====================================================
-   WATER & WEIGHT
-===================================================== */
-function today(){return new Date().toISOString().split("T")[0];}
-function loadWater(){return JSON.parse(localStorage.getItem("water")||"{}")[today()]||0;}
-function saveWater(v){const w=JSON.parse(localStorage.getItem("water")||"{}");w[today()]=v;localStorage.setItem("water",JSON.stringify(w));}
-function addWater(o){saveWater(loadWater()+o);updateWaterUI();}
-function updateWaterUI(){if(waterCount) waterCount.textContent=loadWater();}
-
+/* ===================== WATER / WEIGHT ===================== */
+function addWater(o){
+const w=load("water")||{};w[today()]=(w[today()]||0)+o;save("water",w);
+document.getElementById("water").innerText=w[today()];
+}
 function logWeight(){
-  const v=parseFloat(weightInput.value);
-  if(!v) return;
-  const log=JSON.parse(localStorage.getItem("weights")||"{}");
-  log[today()]=v;
-  localStorage.setItem("weights",JSON.stringify(log));
-  updateWeightUI();
+const v=+weightInput.value;if(!v)return;
+const w=load("weights")||{};w[today()]=v;save("weights",w);
+currentWeight.innerText=v;
 }
-function updateWeightUI(){
-  const log=JSON.parse(localStorage.getItem("weights")||"{}");
-  const d=Object.keys(log).sort();
-  if(currentWeight) currentWeight.textContent=d.length?log[d[d.length-1]]:"--";
+function latestWeight(){
+const w=load("weights")||{};const d=Object.keys(w).sort();
+return d.length?w[d[d.length-1]]:null;
 }
 
-/* =====================================================
-   FOOD LIBRARY
-===================================================== */
+/* ===================== FOOD LIBRARY (EXPANDED) ===================== */
 const FOODS=[
-{n:"Egg Whites",p:11,c:2,f:0},
-{n:"Chicken Breast",p:31,c:0,f:3},
-{n:"Salmon",p:22,c:0,f:12},
-{n:"Rice",p:4,c:45,f:1},
-{n:"Oats",p:10,c:54,f:6},
-{n:"Spinach",p:2,c:4,f:0},
-{n:"Olive Oil",p:0,c:0,f:14},
-{n:"Greek Yogurt",p:17,c:6,f:0}
+{n:"Egg Whites",p:11,c:2,f:0},{n:"Whole Eggs",p:6,c:1,f:5},
+{n:"Chicken Breast",p:31,c:0,f:3},{n:"Lean Ground Turkey",p:22,c:0,f:8},
+{n:"Salmon",p:22,c:0,f:12},{n:"Tuna",p:25,c:0,f:1},
+{n:"Greek Yogurt",p:17,c:6,f:0},{n:"Cottage Cheese",p:14,c:3,f:2},
+{n:"Rice",p:4,c:45,f:1},{n:"Oats",p:10,c:54,f:6},
+{n:"Potatoes",p:4,c:37,f:0},{n:"Sweet Potatoes",p:4,c:41,f:0},
+{n:"Spinach",p:2,c:4,f:0},{n:"Broccoli",p:4,c:11,f:0},
+{n:"Bell Peppers",p:1,c:9,f:0},{n:"Onions",p:1,c:11,f:0},
+{n:"Olive Oil",p:0,c:0,f:14},{n:"Avocado",p:3,c:12,f:21}
 ];
+const food=n=>FOODS.find(f=>f.n===n);
 
-/* =====================================================
-   RECIPES
-===================================================== */
+/* ===================== RECIPES ===================== */
 const RECIPES=[
-{
-id:"egg_scramble",
+{id:"egg_scramble",meal:"breakfast",goal:["cut","maintain"],
 name:"Egg White Scramble",
-meal:"breakfast",
-goal:["cut","maintain"],
 ingredients:[
-{food:"Egg Whites",servings:1.5},
-{food:"Spinach",servings:1},
-{food:"Olive Oil",servings:0.25}
-],
-instructions:[
-"Heat pan over medium heat",
-"Add olive oil",
-"Cook egg whites",
-"Add spinach and season"
-]
-},
-{
-id:"chicken_bowl",
+{food:"Egg Whites",s:1.5},{food:"Spinach",s:1},{food:"Olive Oil",s:0.25}],
+steps:["Heat pan","Cook egg whites","Add spinach"]},
+
+{id:"yogurt_bowl",meal:"breakfast",goal:["maintain","bulk"],
+name:"Greek Yogurt Bowl",
+ingredients:[{food:"Greek Yogurt",s:1}],
+steps:["Scoop yogurt","Serve cold"]},
+
+{id:"chicken_rice",meal:"lunch",goal:["cut","maintain","bulk"],
 name:"Chicken Rice Bowl",
-meal:"lunch",
-goal:["cut","maintain","bulk"],
-ingredients:[
-{food:"Chicken Breast",servings:1},
-{food:"Rice",servings:1}
-],
-instructions:[
-"Cook rice",
-"Season and grill chicken",
-"Combine in bowl"
-]
-},
-{
-id:"salmon_dinner",
-name:"Salmon & Greens",
-meal:"dinner",
-goal:["cut","maintain","bulk"],
-ingredients:[
-{food:"Salmon",servings:1},
-{food:"Spinach",servings:2}
-],
-instructions:[
-"Pan sear salmon",
-"Sauté spinach",
-"Serve hot"
-]
-}
+ingredients:[{food:"Chicken Breast",s:1},{food:"Rice",s:1}],
+steps:["Cook rice","Grill chicken","Combine"]},
+
+{id:"turkey_potato",meal:"dinner",goal:["cut","maintain","bulk"],
+name:"Turkey & Potatoes",
+ingredients:[{food:"Lean Ground Turkey",s:1},{food:"Potatoes",s:1}],
+steps:["Brown turkey","Roast potatoes"]},
+
+{id:"salmon_veg",meal:"dinner",goal:["cut","maintain","bulk"],
+name:"Salmon & Veggies",
+ingredients:[{food:"Salmon",s:1},{food:"Broccoli",s:1}],
+steps:["Bake salmon","Steam broccoli"]}
 ];
 
-/* =====================================================
-   MACROS
-===================================================== */
-function foodByName(n){return FOODS.find(f=>f.n===n);}
-function recipeMacros(r){
-  return r.ingredients.reduce((t,i)=>{
-    const f=foodByName(i.food);
-    if(!f) return t;
-    t.p+=f.p*i.servings;
-    t.c+=f.c*i.servings;
-    t.f+=f.f*i.servings;
-    return t;
-  },{p:0,c:0,f:0});
+/* ===================== MACROS ===================== */
+function macros(r){
+return r.ingredients.reduce((t,i)=>{
+const f=food(i.food);t.p+=f.p*i.s;t.c+=f.c*i.s;t.f+=f.f*i.s;return t;
+},{p:0,c:0,f:0});
 }
 
-/* =====================================================
-   MEAL PLAN (28 DAYS)
-===================================================== */
-function getMealFeedback(){
-  return JSON.parse(localStorage.getItem("mealFeedback")||"{}");
+/* ===================== MEAL PLAN ===================== */
+function generateMealPlan(){
+const fb=load("feedback")||{};
+const pool=RECIPES.filter(r=>r.goal.includes(user.goal)&&fb[r.id]!=="dislike");
+const plan=[];
+for(let w=0;w<4;w++){
+const week=[];
+for(let d=0;d<7;d++){
+const day={};
+["breakfast","lunch","dinner"].forEach(m=>{
+let opts=pool.filter(r=>r.meal===m);
+if(m==="breakfast"&&user.goal==="cut")opts=opts.filter(r=>macros(r).c<10);
+day[m]=opts[Math.floor(Math.random()*opts.length)];
+});
+week.push(day);
 }
-function rateMeal(id,liked){
-  const f=getMealFeedback();
-  f[id]=liked?"like":"dislike";
-  localStorage.setItem("mealFeedback",JSON.stringify(f));
+plan.push(week);
 }
-
-function generateMonthlyMealPlan(){
-  const feedback=getMealFeedback();
-  let pool=RECIPES.filter(r=>r.goal.includes(user.goal)&&feedback[r.id]!=="dislike");
-  const plan=[];
-  for(let w=1;w<=4;w++){
-    const week=[];
-    for(let d=1;d<=7;d++){
-      const day={};
-      ["breakfast","lunch","dinner"].forEach(m=>{
-        let options=pool.filter(r=>r.meal===m);
-        if(m==="breakfast"&&user.goal==="cut"){
-          options=options.filter(r=>recipeMacros(r).c<10);
-        }
-        const choice=options[Math.floor(Math.random()*options.length)];
-        day[m]=choice;
-      });
-      week.push(day);
-    }
-    plan.push(week);
-  }
-  localStorage.setItem("mealPlan",JSON.stringify(plan));
+save("mealPlan",plan);
 }
 
-/* =====================================================
-   RENDER NUTRITION
-===================================================== */
+/* ===================== NUTRITION ===================== */
+function rate(id,val){
+const f=load("feedback")||{};f[id]=val;save("feedback",f);
+}
+function grocery(week){
+const g={};
+week.forEach(d=>Object.values(d).forEach(r=>{
+r.ingredients.forEach(i=>g[i.food]=(g[i.food]||0)+i.s);
+}));
+return g;
+}
 function renderNutrition(){
-  const plan=JSON.parse(localStorage.getItem("mealPlan")||"[]");
-  nutrition.innerHTML=`<h2>28-Day Meal Plan</h2><p class="small">Start: ${user.startDate}</p>`;
-  plan.forEach((week,i)=>{
-    nutrition.innerHTML+=`<div class="week"><h3>Week ${i+1}</h3>`;
-    week.forEach((day,d)=>{
-      nutrition.innerHTML+=`<p><strong>Day ${d+1}</strong></p>`;
-      Object.values(day).forEach(r=>{
-        const m=recipeMacros(r);
-        nutrition.innerHTML+=`
-        <div class="meal">
-          <strong>${r.name}</strong><br>
-          ${Math.round(m.p)}P / ${Math.round(m.c)}C / ${Math.round(m.f)}F
-          <p class="small">${r.instructions.join(" → ")}</p>
-          <button class="secondary small" onclick="rateMeal('${r.id}',true)">👍 Like</button>
-          <button class="secondary small" onclick="rateMeal('${r.id}',false)">👎 Dislike</button>
-        </div>`;
-      });
-    });
-    nutrition.innerHTML+=`</div>`;
-  });
+const plan=load("mealPlan");if(!plan)return;
+nutrition.innerHTML=`<h2>28-Day Meal Plan</h2><p class=small>Start ${user.start}</p>`;
+plan.forEach((week,i)=>{
+nutrition.innerHTML+=`<div class=week><h3>Week ${i+1}</h3>`;
+week.forEach((day,d)=>{
+nutrition.innerHTML+=`<p><strong>Day ${d+1}</strong></p>`;
+Object.values(day).forEach(r=>{
+const m=macros(r);
+nutrition.innerHTML+=`
+<div class=meal>
+<strong>${r.name}</strong><br>
+${Math.round(m.p)}P / ${Math.round(m.c)}C / ${Math.round(m.f)}F
+<p class=small>${r.steps.join(" → ")}</p>
+<button class="secondary small" onclick="rate('${r.id}','like')">👍</button>
+<button class="secondary small" onclick="rate('${r.id}','dislike')">👎</button>
+</div>`;
+});
+});
+const g=grocery(week);
+nutrition.innerHTML+=`<h4>Grocery List</h4>`;
+Object.keys(g).forEach(k=>{
+nutrition.innerHTML+=`<p>${k}: ${g[k]} servings</p>`;
+});
+nutrition.innerHTML+=`</div>`;
+});
 }
 
-/* =====================================================
-   WORKOUT (BASE)
-===================================================== */
-function renderWorkout(){
-  workouts.innerHTML=`
-  <h2>Training Program</h2>
-  <div class="exercise">Squat – 4×8</div>
-  <div class="exercise">Press – 4×8</div>
-  <div class="exercise">Row – 4×10</div>
-  <p class="small">Progress weekly</p>`;
+/* ===================== WORKOUT LOGGING (EXPANDED) ===================== */
+const PROGRAM={
+"Day A":["Squat","Bench Press","Row"],
+"Day B":["Deadlift","Overhead Press","Lat Pulldown"]
+};
+
+function renderWorkouts(){
+const logs=load("workoutLogs")||{};
+workouts.innerHTML=`<h2>Training Log</h2>`;
+Object.keys(PROGRAM).forEach(day=>{
+workouts.innerHTML+=`<h3>${day}</h3>`;
+PROGRAM[day].forEach(ex=>{
+const last=logs[ex]?.[logs[ex].length-1];
+workouts.innerHTML+=`
+<div class=exercise>
+<strong>${ex}</strong>
+<p class=small>Last: ${last?`${last.weight} lbs x ${last.reps}`:"—"}</p>
+<div class=grid>
+<input placeholder="Weight" id="${day}_${ex}_w">
+<input placeholder="Reps" id="${day}_${ex}_r">
+</div>
+<textarea placeholder="Notes (optional)" id="${day}_${ex}_n"></textarea>
+<button class="secondary small" onclick="logSet('${ex}','${day}')">Log Set</button>
+</div>`;
+});
+});
+}
+
+function logSet(ex,day){
+const w=document.getElementById(`${day}_${ex}_w`).value;
+const r=document.getElementById(`${day}_${ex}_r`).value;
+if(!w||!r)return;
+const logs=load("workoutLogs")||{};
+logs[ex]=logs[ex]||[];
+logs[ex].push({date:today(),weight:w,reps:r});
+save("workoutLogs",logs);
+renderWorkouts();
 }
 </script>
 </body>
