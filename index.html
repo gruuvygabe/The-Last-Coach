@@ -105,10 +105,24 @@ button.secondary {
   </div>
 
   <div id="overview" class="card tab">
-    <h2>Hello, <span id="userName"></span></h2>
-    <p><strong>Calories:</strong> <span id="userCalories"></span></p>
-    <p><strong>TDEE:</strong> <span id="userTDEE"></span></p>
+  <h2>Hello, <span id="userName"></span></h2>
+  <p><strong>Calories:</strong> <span id="userCalories"></span></p>
+  <p><strong>TDEE:</strong> <span id="userTDEE"></span></p>
+
+  <!-- WATER TRACKING -->
+  <div class="card">
+    <h3>💧 Water Intake</h3>
+    <p>Today: <strong><span id="waterCount">0</span> oz</strong></p>
+
+    <div style="display:flex; gap:10px;">
+      <button class="secondary" onclick="addWater(8)">+8 oz</button>
+      <button class="secondary" onclick="addWater(16)">+16 oz</button>
+      <button class="secondary" onclick="resetWater()">Reset</button>
+    </div>
+
+    <p class="small">Goal: 64–128 oz per day</p>
   </div>
+</div>
 
   <div id="photos" class="card tab" style="display:none">
     <h2>Progress Photos</h2>
@@ -244,7 +258,41 @@ function finishOnboarding() {
 /* =========================================================
    DASHBOARD LOAD
 ========================================================= */
-function loadDashboard() {
+/* =========================================================
+   WATER TRACKING
+========================================================= */
+
+function getTodayKey() {
+  return new Date().toISOString().split("T")[0];
+}
+
+function loadWater() {
+  const log = JSON.parse(localStorage.getItem("waterLog") || "{}");
+  return log[getTodayKey()] || 0;
+}
+
+function saveWater(amount) {
+  const log = JSON.parse(localStorage.getItem("waterLog") || "{}");
+  log[getTodayKey()] = amount;
+  localStorage.setItem("waterLog", JSON.stringify(log));
+}
+
+function addWater(oz) {
+  const current = loadWater() + oz;
+  saveWater(current);
+  updateWaterUI();
+}
+
+function resetWater() {
+  saveWater(0);
+  updateWaterUI();
+}
+
+function updateWaterUI() {
+  const el = document.getElementById("waterCount");
+  if (el) el.textContent = loadWater();
+}
+  function loadDashboard() {
   showPage("dashboardPage");
 
   userName.innerText = currentUser.name;
@@ -263,7 +311,8 @@ function loadDashboard() {
 
   generateNutritionPlan();
   generateWorkoutPlan();
-}
+  updateWaterUI();
+  }
 
 /* =========================================================
    FOOD DATABASE (FULL, COST-AWARE)
