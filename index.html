@@ -1,352 +1,951 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Coaching Platform</title>
+<title>THE LAST COACH</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FF6B35">
 
 <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
 body {
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:linear-gradient(135deg,#FF6B35,#111);
-  min-height:100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%);
+  min-height: 100vh;
+  padding: 20px;
 }
-.container{max-width:1200px;margin:auto;padding:20px}
-.card{
-  background:#fff;border-radius:18px;padding:25px;margin-bottom:20px;
-  box-shadow:0 15px 40px rgba(0,0,0,.25)
+
+.container { max-width: 1200px; margin: auto; }
+
+.card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: fadeIn 0.3s ease;
 }
-h1,h2,h3,h4{color:#FF6B35;margin-top:0}
-.page{display:none}.page.active{display:block}
-button{
-  width:100%;padding:14px;border:none;border-radius:12px;
-  background:#FF6B35;color:#fff;font-weight:600;cursor:pointer
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-button.secondary{background:#666}
-button.small{padding:8px;font-size:14px;margin-top:6px}
-input,select,textarea{
-  width:100%;padding:12px;margin-top:6px;
-  border-radius:10px;border:2px solid #ddd
+
+h1, h2, h3, h4 { color: #FF6B35; margin-bottom: 15px; }
+h1 { font-size: 42px; }
+h2 { font-size: 28px; }
+h3 { font-size: 22px; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+button, .btn {
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  margin-top: 10px;
+  min-height: 48px;
 }
-.nav{display:flex;gap:10px;margin-bottom:20px}
-.nav button{background:#eee}
-.nav button.active{background:#FF6B35;color:#fff}
-.meal,.exercise{
-  background:#f8f9fa;padding:15px;border-radius:12px;margin-bottom:12px
+
+button:hover { transform: translateY(-2px); }
+button.secondary { background: #6c757d; }
+button.small { padding: 10px; font-size: 14px; width: auto; margin: 5px; }
+
+input, select, textarea {
+  width: 100%;
+  padding: 15px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+  font-size: 16px;
+  font-family: inherit;
 }
-.small{font-size:14px;color:#666}
-.week{border-left:4px solid #FF6B35;padding-left:15px;margin-bottom:25px}
-.badge{
-  display:inline-block;padding:6px 10px;
-  background:#eee;border-radius:10px;margin-right:6px
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #FF6B35;
 }
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:10px
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.nav button {
+  background: rgba(255,255,255,0.9);
+  color: #FF6B35;
+  padding: 15px 25px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.nav button.active {
+  background: white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.tab { display: none; }
+.tab.active { display: block; }
+
+.meal, .exercise {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border-left: 4px solid #FF6B35;
+}
+
+.small { font-size: 14px; color: #666; }
+
+.week {
+  background: #ffe8df;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border-left: 6px solid #FF6B35;
+}
+
+.badge {
+  display: inline-block;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%);
+  color: white;
+  border-radius: 20px;
+  margin: 0 8px 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.stat-box {
+  background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat-box strong {
+  display: block;
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+.progress-bar {
+  background: #e0e0e0;
+  height: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #FF6B35, #ff8c42);
+  height: 100%;
+  transition: width 0.3s;
+}
+
+.header {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  color: white;
+  font-size: 48px;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.assessment-card {
+  background: #ffe8df;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  border-left: 4px solid #FF6B35;
+}
+
+.assessment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.assessment-item {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.assessment-item strong {
+  color: #FF6B35;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.macro {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-right: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.macro.protein { background: #ffebee; color: #c62828; }
+.macro.carbs { background: #e3f2fd; color: #1565c0; }
+.macro.fats { background: #f3e5f5; color: #6a1b9a; }
+
+.grocery-section {
+  background: #e3f2fd;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 15px;
+  border-left: 4px solid #2196F3;
+}
+
+.grocery-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: white;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.weight-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: white;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border-left: 3px solid #FF6B35;
+}
+
+@media (max-width: 768px) {
+  .card { padding: 20px; }
+  .header h1 { font-size: 36px; }
+  .grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
+
 </head>
 
 <body>
 <div class="container">
 
-<!-- LOGIN -->
+<!-- LOGIN PAGE -->
+
 <div id="loginPage" class="page active">
+  <div class="header">
+    <div style="font-size: 60px; margin-bottom: 15px;">💪</div>
+    <h1>THE LAST COACH</h1>
+    <p style="color: white; font-size: 18px;">Your complete fitness transformation system</p>
+  </div>
+
   <div class="card">
-    <h1>Coaching Platform</h1>
-    <input id="email" placeholder="Email">
-    <button onclick="login()">Start</button>
+    <h2>Welcome!</h2>
+    <label>Email</label>
+    <input id="email" type="email" placeholder="your@email.com">
+    <button onclick="login()">Start Your Journey 🚀</button>
   </div>
 </div>
 
-<!-- ONBOARDING -->
+<!-- ONBOARDING PAGE -->
+
 <div id="onboardingPage" class="page">
+  <div class="header">
+    <h1>💪 Let's Build Your Plan</h1>
+    <p style="color: white;">Answer a few questions to personalize everything</p>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+
   <div class="card" id="onboardingCard"></div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- DASHBOARD PAGE -->
+
 <div id="dashboardPage" class="page">
-  <div class="nav">
-    <button class="active" onclick="switchTab('overview')">Dashboard</button>
-    <button onclick="switchTab('nutrition')">Nutrition</button>
-    <button onclick="switchTab('workouts')">Workouts</button>
+  <div class="card" style="background: white;">
+    <h1 style="margin: 0;">THE LAST COACH 💪</h1>
   </div>
 
-  <div id="overview" class="card tab"></div>
-  <div id="nutrition" class="card tab" style="display:none"></div>
-  <div id="workouts" class="card tab" style="display:none"></div>
+  <div class="nav">
+    <button class="active" onclick="switchTab('overview')">📊 Dashboard</button>
+    <button onclick="switchTab('assessment')">📋 Assessment</button>
+    <button onclick="switchTab('nutrition')">🍎 Meal Plan</button>
+    <button onclick="switchTab('workouts')">💪 Workouts</button>
+    <button onclick="switchTab('tracking')">📈 Tracking</button>
+  </div>
+
+  <div id="overview" class="tab active"></div>
+  <div id="assessment" class="tab"></div>
+  <div id="nutrition" class="tab"></div>
+  <div id="workouts" class="tab"></div>
+  <div id="tracking" class="tab"></div>
 </div>
 
 </div>
 
 <script>
-/* ===================== STATE ===================== */
-let user={},step=0;
-const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-const load=k=>JSON.parse(localStorage.getItem(k)||"null");
-const today=()=>new Date().toISOString().split("T")[0];
+/* =============== STATE =============== */
+let user = {};
+let step = 0;
+const totalSteps = 5;
 
-/* ===================== LOGIN / NAV ===================== */
-function login(){show("onboardingPage");renderStep();}
-function show(id){
-  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-function switchTab(id){
-  document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
-  document.getElementById(id).style.display="block";
-  document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
-  event.target.classList.add("active");
+const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const load = k => JSON.parse(localStorage.getItem(k) || 'null');
+const today = () => new Date().toISOString().split('T')[0];
+
+/* =============== LOGIN =============== */
+function login() {
+  const emailInput = document.getElementById('email');
+  const email = emailInput.value.trim();
+  
+  if (!email) {
+    alert('Please enter your email');
+    return;
+  }
+  
+  user.email = email;
+  const saved = load('user_' + email);
+  
+  if (saved && saved.onboardingComplete) {
+    user = saved;
+    show('dashboardPage');
+    loadDashboard();
+  } else {
+    show('onboardingPage');
+    renderStep();
+  }
 }
 
-/* ===================== ONBOARDING ===================== */
-const steps=[
-()=>`<h2>Name</h2><input id=n><button onclick="next(()=>user.name=n.value)">Next</button>`,
-()=>`<h2>Stats</h2>
-<input id=w placeholder="Weight (lbs)">
-<input id=h placeholder="Height (in)">
-<input id=a placeholder="Age">
-<select id=g><option>male</option><option>female</option></select>
-<button onclick="next(()=>{
-user.weight=+w.value;user.height=+h.value;user.age=+a.value;user.gender=g.value
-})">Next</button>`,
-()=>`<h2>Goal</h2>
-<select id=goal>
-<option value=cut>Fat Loss</option>
-<option value=maintain>Maintain</option>
-<option value=bulk>Muscle Gain</option>
-</select>
-<button onclick="next(()=>user.goal=goal.value)">Next</button>`,
-()=>`<h2>Training Days</h2>
-<input type=range min=2 max=6 value=4 id=d oninput=dv.innerText=d.value>
-<div id=dv>4</div>
-<button onclick="next(()=>user.days=+d.value)">Next</button>`,
-()=>`<h2>Equipment</h2>
-<select id=eq multiple>
-<option value=bodyweight>Bodyweight</option>
-<option value=dumbbells>Dumbbells</option>
-<option value=barbells>Barbells</option>
-<option value=gym>Full Gym</option>
-</select>
-<button onclick="next(()=>user.equipment=[...eq.selectedOptions].map(o=>o.value))">Finish</button>`
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  if (id === 'assessment') renderAssessment();
+  if (id === 'nutrition') renderNutrition();
+  if (id === 'workouts') renderWorkouts();
+  if (id === 'tracking') renderTracking();
+}
+
+/* =============== ONBOARDING =============== */
+const steps = [
+  () => `
+    <h2>What's your name?</h2>
+    <input id="n" placeholder="First name" value="${user.name || ''}">
+    <button onclick="next(() => user.name = n.value)">Continue</button>
+  `,
+  
+  () => `
+    <h2>Your Stats</h2>
+    <label>Current Weight (lbs)</label>
+    <input id="w" type="number" placeholder="150" value="${user.weight || ''}">
+    <label>Height (inches)</label>
+    <input id="h" type="number" placeholder="70" value="${user.height || ''}">
+    <label>Age</label>
+    <input id="a" type="number" placeholder="25" value="${user.age || ''}">
+    <label>Gender</label>
+    <select id="g">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+    <button onclick="next(() => {
+      user.weight = +w.value;
+      user.height = +h.value;
+      user.age = +a.value;
+      user.gender = g.value;
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  () => `
+    <h2>Your Goal</h2>
+    <label>Primary Goal</label>
+    <select id="goal">
+      <option value="cut">🔥 Fat Loss</option>
+      <option value="maintain">⚖️ Maintain</option>
+      <option value="bulk">💪 Muscle Gain</option>
+    </select>
+    <label>Goal Weight (lbs)</label>
+    <input id="gw" type="number" placeholder="145" value="${user.goalWeight || ''}">
+    <button onclick="next(() => {
+      user.goal = goal.value;
+      user.goalWeight = +gw.value;
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  () => `
+    <h2>Training Schedule</h2>
+    <label>Training Days Per Week</label>
+    <input type="range" min="2" max="6" value="${user.days || 4}" id="d" 
+           oninput="dv.innerText = d.value + ' days/week'">
+    <div id="dv" style="text-align: center; font-size: 24px; font-weight: bold; color: #FF6B35; margin: 15px 0;">
+      ${user.days || 4} days/week
+    </div>
+    <label>Activity Level</label>
+    <select id="activity">
+      <option value="1.2">Sedentary</option>
+      <option value="1.375">Lightly Active</option>
+      <option value="1.55" selected>Moderately Active</option>
+      <option value="1.725">Very Active</option>
+    </select>
+    <button onclick="next(() => {
+      user.days = +d.value;
+      user.activityLevel = activity.value;
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  () => `
+    <h2>Equipment & Diet</h2>
+    <label>Available Equipment (Ctrl/Cmd for multiple)</label>
+    <select id="eq" multiple size="5" style="height: auto;">
+      <option value="bodyweight">🤸 Bodyweight</option>
+      <option value="dumbbells">🏋️ Dumbbells</option>
+      <option value="barbells">💪 Barbells</option>
+      <option value="gym">🏢 Full Gym</option>
+    </select>
+    <label>Dietary Preferences</label>
+    <select id="diet" multiple size="4" style="height: auto;">
+      <option value="none" selected>No Restrictions</option>
+      <option value="vegetarian">🥗 Vegetarian</option>
+      <option value="keto">🥑 Keto</option>
+    </select>
+    <button onclick="finish()">Complete Setup 🎉</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `
 ];
-function renderStep(){onboardingCard.innerHTML=steps[step]();}
-function next(fn){fn();step++;step>=steps.length?finish():renderStep();}
 
-/* ===================== CALCS ===================== */
-function finish(){
-  const kg=user.weight*0.4536,cm=user.height*2.54;
-  const bmr=user.gender==="male"
-    ?10*kg+6.25*cm-5*user.age+5
-    :10*kg+6.25*cm-5*user.age-161;
-  user.tdee=Math.round(bmr*1.55);
-  user.calories=user.goal==="cut"?user.tdee-500:user.goal==="bulk"?user.tdee+300:user.tdee;
-  user.start=today();
-  save("user",user);
+function renderStep() {
+  document.getElementById('progressFill').style.width = ((step / totalSteps) * 100) + '%';
+  document.getElementById('onboardingCard').innerHTML = steps[step]();
+}
+
+function next(fn) {
+  if (fn) fn();
+  step++;
+  if (step >= steps.length) finish();
+  else renderStep();
+}
+
+function prev() {
+  step--;
+  if (step < 0) step = 0;
+  renderStep();
+}
+
+/* =============== CALCULATIONS =============== */
+function finish() {
+  const eqSelect = document.getElementById('eq');
+  user.equipment = eqSelect ? [...eqSelect.selectedOptions].map(o => o.value) : ['bodyweight'];
+  
+  const dietSelect = document.getElementById('diet');
+  user.diet = dietSelect ? [...dietSelect.selectedOptions].map(o => o.value) : ['none'];
+  
+  // BMR calculation
+  const kg = user.weight * 0.453592;
+  const cm = user.height * 2.54;
+  const bmr = user.gender === "male"
+    ? 10 * kg + 6.25 * cm - 5 * user.age + 5
+    : 10 * kg + 6.25 * cm - 5 * user.age - 161;
+  
+  user.tdee = Math.round(bmr * parseFloat(user.activityLevel));
+  user.calories = user.goal === "cut" ? user.tdee - 500 : user.goal === "bulk" ? user.tdee + 300 : user.tdee;
+  
+  // Macros
+  const ratio = {
+    cut: {p: 0.40, c: 0.30, f: 0.30},
+    maintain: {p: 0.30, c: 0.40, f: 0.30},
+    bulk: {p: 0.30, c: 0.50, f: 0.20}
+  }[user.goal];
+  
+  user.macros = {
+    protein: Math.round((user.calories * ratio.p) / 4),
+    carbs: Math.round((user.calories * ratio.c) / 4),
+    fats: Math.round((user.calories * ratio.f) / 9)
+  };
+  
+  user.startDate = today();
+  user.onboardingComplete = true;
+  save('user_' + user.email, user);
+  
   generateMealPlan();
-  show("dashboardPage");
+  generateWorkoutPlan();
+  
+  show('dashboardPage');
   loadDashboard();
 }
 
-/* ===================== DASHBOARD ===================== */
-function split(){
-  if(user.days<=3) return "Full Body";
-  if(user.days===4) return "Upper / Lower";
-  return "Push / Pull / Legs";
-}
-function loadDashboard(){
-overview.innerHTML=`
-<h2>${user.name}</h2>
-<span class=badge>Start ${user.start}</span>
-<span class=badge>${user.goal.toUpperCase()}</span>
-
-<div class=grid>
-<div><strong>Calories</strong><br>${user.calories}</div>
-<div><strong>TDEE</strong><br>${user.tdee}</div>
-<div><strong>Split</strong><br>${split()}</div>
-</div>
-
-<div class=meal>
-<h3>💧 Water</h3>
-<p><span id=water>${load("water")?.[today()]||0}</span> oz</p>
-<button class="secondary small" onclick="addWater(8)">+8 oz</button>
-</div>
-
-<div class=meal>
-<h3>⚖️ Weight</h3>
-<input id=weightInput placeholder="Today's weight">
-<button class="secondary small" onclick="logWeight()">Log</button>
-<p class=small>Current: <span id=currentWeight>${latestWeight()||"--"}</span></p>
-</div>`;
-renderNutrition();
-renderWorkouts();
+/* =============== DASHBOARD =============== */
+function getSplit() {
+  if (user.days <= 3) return "Full Body";
+  if (user.days === 4) return "Upper/Lower";
+  return "Push/Pull/Legs";
 }
 
-/* ===================== WATER / WEIGHT ===================== */
-function addWater(o){
-const w=load("water")||{};w[today()]=(w[today()]||0)+o;save("water",w);
-document.getElementById("water").innerText=w[today()];
-}
-function logWeight(){
-const v=+weightInput.value;if(!v)return;
-const w=load("weights")||{};w[today()]=v;save("weights",w);
-currentWeight.innerText=v;
-}
-function latestWeight(){
-const w=load("weights")||{};const d=Object.keys(w).sort();
-return d.length?w[d[d.length-1]]:null;
+function loadDashboard() {
+  const water = load("water")?.[today()] || 0;
+  const currentWeight = latestWeight() || user.weight;
+  const weightToGo = Math.abs(user.weight - user.goalWeight).toFixed(1);
+  
+  overview.innerHTML = `
+    <div class="card">
+      <h2>Welcome back, ${user.name}! 👋</h2>
+      <div>
+        <span class="badge">Started ${new Date(user.startDate).toLocaleDateString()}</span>
+        <span class="badge">${user.goal.toUpperCase()}</span>
+        <span class="badge">${getSplit()}</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="stat-box"><strong>${user.calories}</strong><span>Calories</span></div>
+      <div class="stat-box"><strong>${user.macros.protein}g</strong><span>Protein</span></div>
+      <div class="stat-box"><strong>${user.macros.carbs}g</strong><span>Carbs</span></div>
+      <div class="stat-box"><strong>${user.macros.fats}g</strong><span>Fats</span></div>
+    </div>
+
+    <div class="card">
+      <h3>💧 Water</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 32px; font-weight: bold; color: #FF6B35;" id="water">${water}</span>
+        <span>oz today</span>
+      </div>
+      <button class="small secondary" onclick="addWater(8)">+8 oz</button>
+    </div>
+
+    <div class="card">
+      <h3>⚖️ Weight</h3>
+      <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+        <input id="weightInput" type="number" step="0.1" placeholder="${currentWeight}">
+        <button class="small" onclick="logWeight()" style="width: auto;">Log</button>
+      </div>
+      <div style="margin-top: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
+        <div><strong class="small">Current</strong><div style="font-size: 24px; color: #FF6B35;">${currentWeight}</div></div>
+        <div><strong class="small">Goal</strong><div style="font-size: 24px; color: #FF6B35;">${user.goalWeight}</div></div>
+        <div><strong class="small">To Go</strong><div style="font-size: 24px; color: #FF6B35;">${weightToGo}</div></div>
+      </div>
+    </div>
+  `;
 }
 
-/* ===================== FOOD LIBRARY (EXPANDED) ===================== */
-const FOODS=[
-{n:"Egg Whites",p:11,c:2,f:0},{n:"Whole Eggs",p:6,c:1,f:5},
-{n:"Chicken Breast",p:31,c:0,f:3},{n:"Lean Ground Turkey",p:22,c:0,f:8},
-{n:"Salmon",p:22,c:0,f:12},{n:"Tuna",p:25,c:0,f:1},
-{n:"Greek Yogurt",p:17,c:6,f:0},{n:"Cottage Cheese",p:14,c:3,f:2},
-{n:"Rice",p:4,c:45,f:1},{n:"Oats",p:10,c:54,f:6},
-{n:"Potatoes",p:4,c:37,f:0},{n:"Sweet Potatoes",p:4,c:41,f:0},
-{n:"Spinach",p:2,c:4,f:0},{n:"Broccoli",p:4,c:11,f:0},
-{n:"Bell Peppers",p:1,c:9,f:0},{n:"Onions",p:1,c:11,f:0},
-{n:"Olive Oil",p:0,c:0,f:14},{n:"Avocado",p:3,c:12,f:21}
+function addWater(oz) {
+  const w = load("water") || {};
+  w[today()] = (w[today()] || 0) + oz;
+  save("water", w);
+  document.getElementById("water").innerText = w[today()];
+}
+
+function logWeight() {
+  const v = +document.getElementById('weightInput').value;
+  if (!v) return alert('Enter weight');
+  const w = load("weights") || {};
+  w[today()] = v;
+  save("weights", w);
+  loadDashboard();
+}
+
+function latestWeight() {
+  const w = load("weights") || {};
+  const dates = Object.keys(w).sort();
+  return dates.length ? w[dates[dates.length - 1]] : null;
+}
+
+/* =============== ASSESSMENT =============== */
+function renderAssessment() {
+  assessment.innerHTML = `
+    <div class="card">
+      <h2>📋 Your Assessment</h2>
+      <p class="small">Generated from your onboarding</p>
+    </div>
+
+    <div class="assessment-card">
+      <h3>👤 Personal Info</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Name</strong>${user.name}</div>
+        <div class="assessment-item"><strong>Age</strong>${user.age} years</div>
+        <div class="assessment-item"><strong>Gender</strong>${user.gender}</div>
+        <div class="assessment-item"><strong>Height</strong>${Math.floor(user.height/12)}'${user.height%12}"</div>
+      </div>
+    </div>
+
+    <div class="assessment-card">
+      <h3>🎯 Goals</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Goal</strong>${user.goal === 'cut' ? '🔥 Fat Loss' : user.goal === 'bulk' ? '💪 Muscle Gain' : '⚖️ Maintain'}</div>
+        <div class="assessment-item"><strong>Start Weight</strong>${user.weight} lbs</div>
+        <div class="assessment-item"><strong>Goal Weight</strong>${user.goalWeight} lbs</div>
+        <div class="assessment-item"><strong>To Go</strong>${Math.abs(user.weight - user.goalWeight).toFixed(1)} lbs</div>
+      </div>
+    </div>
+
+    <div class="assessment-card">
+      <h3>🏋️ Training</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Days/Week</strong>${user.days}</div>
+        <div class="assessment-item"><strong>Split</strong>${getSplit()}</div>
+        <div class="assessment-item"><strong>Equipment</strong>${user.equipment.join(', ')}</div>
+      </div>
+    </div>
+
+    <div class="assessment-card">
+      <h3>🍎 Nutrition</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Calories</strong>${user.calories} kcal</div>
+        <div class="assessment-item"><strong>Protein</strong>${user.macros.protein}g</div>
+        <div class="assessment-item"><strong>Carbs</strong>${user.macros.carbs}g</div>
+        <div class="assessment-item"><strong>Fats</strong>${user.macros.fats}g</div>
+        <div class="assessment-item"><strong>TDEE</strong>${user.tdee} kcal</div>
+        <div class="assessment-item"><strong>Diet</strong>${user.diet.join(', ')}</div>
+      </div>
+    </div>
+  `;
+}
+
+/* =============== FOOD & RECIPES =============== */
+const FOODS = [
+  {n:"Egg Whites",p:11,c:2,f:0,u:"cup"},
+  {n:"Chicken Breast",p:31,c:0,f:3,u:"4oz"},
+  {n:"Lean Turkey",p:22,c:0,f:8,u:"4oz"},
+  {n:"Salmon",p:22,c:0,f:12,u:"4oz"},
+  {n:"Greek Yogurt",p:17,c:6,f:0,u:"cup"},
+  {n:"Brown Rice",p:5,c:45,f:2,u:"cup"},
+  {n:"Oats",p:10,c:54,f:6,u:"cup"},
+  {n:"Sweet Potato",p:4,c:41,f:0,u:"medium"},
+  {n:"Broccoli",p:4,c:11,f:0,u:"cup"},
+  {n:"Spinach",p:2,c:4,f:0,u:"cup"},
+  {n:"Avocado",p:3,c:12,f:21,u:"whole"},
+  {n:"Olive Oil",p:0,c:0,f:14,u:"tbsp"},
+  {n:"Banana",p:1,c:27,f:0,u:"medium"},
+  {n:"Whey Protein",p:24,c:3,f:1,u:"scoop"}
 ];
-const food=n=>FOODS.find(f=>f.n===n);
 
-/* ===================== RECIPES ===================== */
-const RECIPES=[
-{id:"egg_scramble",meal:"breakfast",goal:["cut","maintain"],
-name:"Egg White Scramble",
-ingredients:[
-{food:"Egg Whites",s:1.5},{food:"Spinach",s:1},{food:"Olive Oil",s:0.25}],
-steps:["Heat pan","Cook egg whites","Add spinach"]},
+const food = n => FOODS.find(f => f.n === n);
 
-{id:"yogurt_bowl",meal:"breakfast",goal:["maintain","bulk"],
-name:"Greek Yogurt Bowl",
-ingredients:[{food:"Greek Yogurt",s:1}],
-steps:["Scoop yogurt","Serve cold"]},
-
-{id:"chicken_rice",meal:"lunch",goal:["cut","maintain","bulk"],
-name:"Chicken Rice Bowl",
-ingredients:[{food:"Chicken Breast",s:1},{food:"Rice",s:1}],
-steps:["Cook rice","Grill chicken","Combine"]},
-
-{id:"turkey_potato",meal:"dinner",goal:["cut","maintain","bulk"],
-name:"Turkey & Potatoes",
-ingredients:[{food:"Lean Ground Turkey",s:1},{food:"Potatoes",s:1}],
-steps:["Brown turkey","Roast potatoes"]},
-
-{id:"salmon_veg",meal:"dinner",goal:["cut","maintain","bulk"],
-name:"Salmon & Veggies",
-ingredients:[{food:"Salmon",s:1},{food:"Broccoli",s:1}],
-steps:["Bake salmon","Steam broccoli"]}
+const RECIPES = [
+  {
+    id:"egg_scramble", meal:"breakfast", goal:["cut","maintain"],
+    name:"Egg White Scramble",
+    ingredients:[{food:"Egg Whites",s:1.5},{food:"Spinach",s:1},{food:"Olive Oil",s:0.25}],
+    steps:["Heat oil","Cook eggs","Add spinach"]
+  },
+  {
+    id:"yogurt_bowl", meal:"breakfast", goal:["maintain","bulk"],
+    name:"Greek Yogurt Bowl",
+    ingredients:[{food:"Greek Yogurt",s:1.5},{food:"Banana",s:1}],
+    steps:["Layer yogurt","Top with banana"]
+  },
+  {
+    id:"chicken_rice", meal:"lunch", goal:["cut","maintain","bulk"],
+    name:"Chicken & Rice",
+    ingredients:[{food:"Chicken Breast",s:1.5},{food:"Brown Rice",s:1},{food:"Broccoli",s:1}],
+    steps:["Grill chicken","Cook rice","Steam broccoli","Combine"]
+  },
+  {
+    id:"turkey_potato", meal:"dinner", goal:["cut","maintain","bulk"],
+    name:"Turkey & Sweet Potato",
+    ingredients:[{food:"Lean Turkey",s:1.5},{food:"Sweet Potato",s:2},{food:"Spinach",s:1}],
+    steps:["Brown turkey","Roast potato","Sauté spinach"]
+  },
+  {
+    id:"salmon_veg", meal:"dinner", goal:["maintain","bulk"],
+    name:"Salmon & Veggies",
+    ingredients:[{food:"Salmon",s:1.5},{food:"Broccoli",s:1.5},{food:"Olive Oil",s:0.5}],
+    steps:["Bake salmon","Steam broccoli","Drizzle oil"]
+  }
 ];
 
-/* ===================== MACROS ===================== */
-function macros(r){
-return r.ingredients.reduce((t,i)=>{
-const f=food(i.food);t.p+=f.p*i.s;t.c+=f.c*i.s;t.f+=f.f*i.s;return t;
-},{p:0,c:0,f:0});
+function macros(recipe) {
+  return recipe.ingredients.reduce((t, i) => {
+    const f = food(i.food);
+    t.p += f.p * i.s;
+    t.c += f.c * i.s;
+    t.f += f.f * i.s;
+    return t;
+  }, {p:0, c:0, f:0});
 }
 
-/* ===================== MEAL PLAN ===================== */
-function generateMealPlan(){
-const fb=load("feedback")||{};
-const pool=RECIPES.filter(r=>r.goal.includes(user.goal)&&fb[r.id]!=="dislike");
-const plan=[];
-for(let w=0;w<4;w++){
-const week=[];
-for(let d=0;d<7;d++){
-const day={};
-["breakfast","lunch","dinner"].forEach(m=>{
-let opts=pool.filter(r=>r.meal===m);
-if(m==="breakfast"&&user.goal==="cut")opts=opts.filter(r=>macros(r).c<10);
-day[m]=opts[Math.floor(Math.random()*opts.length)];
-});
-week.push(day);
-}
-plan.push(week);
-}
-save("mealPlan",plan);
-}
-
-/* ===================== NUTRITION ===================== */
-function rate(id,val){
-const f=load("feedback")||{};f[id]=val;save("feedback",f);
-}
-function grocery(week){
-const g={};
-week.forEach(d=>Object.values(d).forEach(r=>{
-r.ingredients.forEach(i=>g[i.food]=(g[i.food]||0)+i.s);
-}));
-return g;
-}
-function renderNutrition(){
-const plan=load("mealPlan");if(!plan)return;
-nutrition.innerHTML=`<h2>28-Day Meal Plan</h2><p class=small>Start ${user.start}</p>`;
-plan.forEach((week,i)=>{
-nutrition.innerHTML+=`<div class=week><h3>Week ${i+1}</h3>`;
-week.forEach((day,d)=>{
-nutrition.innerHTML+=`<p><strong>Day ${d+1}</strong></p>`;
-Object.values(day).forEach(r=>{
-const m=macros(r);
-nutrition.innerHTML+=`
-<div class=meal>
-<strong>${r.name}</strong><br>
-${Math.round(m.p)}P / ${Math.round(m.c)}C / ${Math.round(m.f)}F
-<p class=small>${r.steps.join(" → ")}</p>
-<button class="secondary small" onclick="rate('${r.id}','like')">👍</button>
-<button class="secondary small" onclick="rate('${r.id}','dislike')">👎</button>
-</div>`;
-});
-});
-const g=grocery(week);
-nutrition.innerHTML+=`<h4>Grocery List</h4>`;
-Object.keys(g).forEach(k=>{
-nutrition.innerHTML+=`<p>${k}: ${g[k]} servings</p>`;
-});
-nutrition.innerHTML+=`</div>`;
-});
+function generateMealPlan() {
+  const feedback = load("feedback") || {};
+  const pool = RECIPES.filter(r => r.goal.includes(user.goal) && feedback[r.id] !== "dislike");
+  
+  const plan = [];
+  for (let w = 0; w < 4; w++) {
+    const week = [];
+    for (let d = 0; d < 7; d++) {
+      const day = {};
+      ["breakfast", "lunch", "dinner"].forEach(meal => {
+        const opts = pool.filter(r => r.meal === meal);
+        if (opts.length > 0) day[meal] = opts[Math.floor(Math.random() * opts.length)];
+      });
+      week.push(day);
+    }
+    plan.push(week);
+  }
+  
+  save("mealPlan", plan);
+  return plan;
 }
 
-/* ===================== WORKOUT LOGGING (EXPANDED) ===================== */
-const PROGRAM={
-"Day A":["Squat","Bench Press","Row"],
-"Day B":["Deadlift","Overhead Press","Lat Pulldown"]
+function rate(id, val) {
+  const f = load("feedback") || {};
+  f[id] = val;
+  save("feedback", f);
+  generateMealPlan();
+  renderNutrition();
+}
+
+function grocery(week) {
+  const g = {};
+  week.forEach(day => {
+    Object.values(day).forEach(recipe => {
+      if (recipe) recipe.ingredients.forEach(i => g[i.food] = (g[i.food] || 0) + i.s);
+    });
+  });
+  return g;
+}
+
+function renderNutrition() {
+  let plan = load("mealPlan");
+  if (!plan) plan = generateMealPlan();
+  
+  nutrition.innerHTML = `
+    <div class="card">
+      <h2>🍎 28-Day Meal Plan</h2>
+      <p class="small">Personalized for ${user.goal} • ${user.calories} cal/day</p>
+    </div>
+  `;
+  
+  plan.forEach((week, i) => {
+    nutrition.innerHTML += `<div class="week"><h3>Week ${i + 1}</h3>`;
+    
+    week.forEach((day, d) => {
+      nutrition.innerHTML += `<h4 style="margin-top: 20px; color: #333;">Day ${d + 1}</h4>`;
+      
+      Object.values(day).forEach(recipe => {
+        if (!recipe) return;
+        const m = macros(recipe);
+        const cals = Math.round(m.p * 4 + m.c * 4 + m.f * 9);
+        
+        nutrition.innerHTML += `
+          <div class="meal">
+            <div style="display: flex; justify-content: space-between;">
+              <strong style="font-size: 18px;">${recipe.name}</strong>
+              <strong>${cals} cal</strong>
+            </div>
+            <div style="margin: 10px 0;">
+              <span class="macro protein">${Math.round(m.p)}P</span>
+              <span class="macro carbs">${Math.round(m.c)}C</span>
+              <span class="macro fats">${Math.round(m.f)}F</span>
+            </div>
+            <p class="small">${recipe.steps.join(" → ")}</p>
+            <button class="small" onclick="rate('${recipe.id}','like')">👍</button>
+            <button class="small secondary" onclick="rate('${recipe.id}','dislike')">👎</button>
+          </div>
+        `;
+      });
+    });
+    
+    const g = grocery(week);
+    nutrition.innerHTML += `
+      <div class="grocery-section">
+        <h4>🛒 Grocery List</h4>
+        ${Object.keys(g).map(k => `
+          <div class="grocery-item">
+            <span>${k}</span>
+            <strong>${g[k].toFixed(1)} ${food(k).u}</strong>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    
+    nutrition.innerHTML += `</div>`;
+  });
+}
+
+/* =============== WORKOUTS =============== */
+const EXERCISES = {
+  fullbody: ["Squat", "Bench Press", "Deadlift", "Overhead Press", "Row"],
+  upper: ["Bench Press", "Row", "Overhead Press", "Pull-Ups", "Dips"],
+  lower: ["Squat", "Deadlift", "Leg Press", "Leg Curl", "Calf Raises"],
+  push: ["Bench Press", "Incline Press", "Overhead Press", "Tricep Dips"],
+  pull: ["Deadlift", "Pull-Ups", "Barbell Row", "Face Pulls", "Curls"],
+  legs: ["Squat", "Leg Press", "Leg Curl", "Calf Raises", "Lunges"]
 };
 
-function renderWorkouts(){
-const logs=load("workoutLogs")||{};
-workouts.innerHTML=`<h2>Training Log</h2>`;
-Object.keys(PROGRAM).forEach(day=>{
-workouts.innerHTML+=`<h3>${day}</h3>`;
-PROGRAM[day].forEach(ex=>{
-const last=logs[ex]?.[logs[ex].length-1];
-workouts.innerHTML+=`
-<div class=exercise>
-<strong>${ex}</strong>
-<p class=small>Last: ${last?`${last.weight} lbs x ${last.reps}`:"—"}</p>
-<div class=grid>
-<input placeholder="Weight" id="${day}_${ex}_w">
-<input placeholder="Reps" id="${day}_${ex}_r">
-</div>
-<textarea placeholder="Notes (optional)" id="${day}_${ex}_n"></textarea>
-<button class="secondary small" onclick="logSet('${ex}','${day}')">Log Set</button>
-</div>`;
-});
-});
+function generateWorkoutPlan() {
+  let program = {};
+  
+  if (user.days <= 3) {
+    program = {
+      "Day A": EXERCISES.fullbody,
+      "Day B": EXERCISES.fullbody.reverse()
+    };
+  } else if (user.days === 4) {
+    program = {
+      "Upper": EXERCISES.upper,
+      "Lower": EXERCISES.lower
+    };
+  } else {
+    program = {
+      "Push": EXERCISES.push,
+      "Pull": EXERCISES.pull,
+      "Legs": EXERCISES.legs
+    };
+  }
+  
+  save("workoutProgram", program);
 }
 
-function logSet(ex,day){
-const w=document.getElementById(`${day}_${ex}_w`).value;
-const r=document.getElementById(`${day}_${ex}_r`).value;
-if(!w||!r)return;
-const logs=load("workoutLogs")||{};
-logs[ex]=logs[ex]||[];
-logs[ex].push({date:today(),weight:w,reps:r});
-save("workoutLogs",logs);
-renderWorkouts();
+function renderWorkouts() {
+  const program = load("workoutProgram") || {};
+  const logs = load("workoutLogs") || {};
+  
+  workouts.innerHTML = `
+    <div class="card">
+      <h2>💪 ${getSplit()} Training</h2>
+      <p class="small">${user.days} days/week</p>
+    </div>
+  `;
+  
+  Object.keys(program).forEach(day => {
+    workouts.innerHTML += `<div class="week"><h3>${day}</h3>`;
+    
+    program[day].forEach(ex => {
+      const history = logs[ex] || [];
+      const last = history[history.length - 1];
+      
+      workouts.innerHTML += `
+        <div class="exercise">
+          <div style="display: flex; justify-content: space-between;">
+            <strong style="font-size: 18px;">${ex}</strong>
+            ${last ? `<span class="small">Last: ${last.weight} lbs × ${last.reps}</span>` : ''}
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+            <input id="${day}_${ex}_w" type="number" placeholder="Weight">
+            <input id="${day}_${ex}_r" type="number" placeholder="Reps">
+          </div>
+          <button class="small" onclick="logSet('${ex}','${day}')">Log Set</button>
+        </div>
+      `;
+    });
+    
+    workouts.innerHTML += `</div>`;
+  });
 }
+
+function logSet(ex, day) {
+  const w = document.getElementById(`${day}_${ex}_w`).value;
+  const r = document.getElementById(`${day}_${ex}_r`).value;
+  if (!w || !r) return alert('Enter weight and reps');
+  
+  const logs = load("workoutLogs") || {};
+  logs[ex] = logs[ex] || [];
+  logs[ex].push({date: today(), weight: w, reps: r});
+  save("workoutLogs", logs);
+  renderWorkouts();
+}
+
+/* =============== TRACKING =============== */
+function renderTracking() {
+  const weights = load("weights") || {};
+  const water = load("water") || {};
+  
+  const weightEntries = Object.entries(weights).sort().reverse().slice(0, 10);
+  const waterEntries = Object.entries(water).sort().reverse().slice(0, 7);
+  
+  tracking.innerHTML = `
+    <div class="card">
+      <h2>📈 Progress Tracking</h2>
+    </div>
+    
+    <div class="week">
+      <h3>⚖️ Weight History</h3>
+      ${weightEntries.length > 0 ? weightEntries.map(([date, weight]) => `
+        <div class="weight-entry">
+          <span>${date}</span>
+          <strong style="color: #FF6B35;">${weight} lbs</strong>
+        </div>
+      `).join('') : '<p class="small">No weight logs yet</p>'}
+    </div>
+    
+    <div class="week">
+      <h3>💧 Water Intake</h3>
+      ${waterEntries.length > 0 ? waterEntries.map(([date, oz]) => `
+        <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>${date}</span>
+            <strong style="color: #FF6B35;">${oz} oz</strong>
+          </div>
+          <div class="progress-bar" style="margin: 0;">
+            <div class="progress-fill" style="width: ${Math.min(oz, 100)}%"></div>
+          </div>
+        </div>
+      `).join('') : '<p class="small">No water logs yet</p>'}
+    </div>
+  `;
+}
+
+/* =============== INIT =============== */
+window.onload = function() {
+  const lastEmail = load('lastEmail');
+  if (lastEmail) {
+    const savedUser = load('user_' + lastEmail);
+    if (savedUser && savedUser.onboardingComplete) {
+      document.getElementById('email').value = lastEmail;
+      user = savedUser;
+      show('dashboardPage');
+      loadDashboard();
+    }
+  }
+};
+
+window.addEventListener('beforeunload', () => {
+  if (user.email) save('lastEmail', user.email);
+});
 </script>
+
 </body>
 </html>
