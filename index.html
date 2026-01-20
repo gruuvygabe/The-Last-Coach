@@ -273,10 +273,35 @@ label {
   </div>
 
   <div class="card">
-    <h2>Welcome!</h2>
-    <label>Email</label>
-    <input id="email" type="email" placeholder="your@email.com">
-    <button onclick="login()">Start Your Journey 🚀</button>
+    <h2 id="authTitle">Sign In</h2>
+
+```
+<div id="signinForm">
+  <label>Email</label>
+  <input id="signinEmail" type="email" placeholder="your@email.com">
+  
+  <label>Password</label>
+  <input id="signinPassword" type="password" placeholder="Enter your password">
+  
+  <button onclick="handleSignIn()">Sign In 🚀</button>
+  <button class="secondary" onclick="toggleAuth()">Don't have an account? Sign Up</button>
+</div>
+
+<div id="signupForm" style="display: none;">
+  <label>Email</label>
+  <input id="signupEmail" type="email" placeholder="your@email.com">
+  
+  <label>Password</label>
+  <input id="signupPassword" type="password" placeholder="Create a password (min 6 characters)">
+  
+  <label>Confirm Password</label>
+  <input id="signupConfirmPassword" type="password" placeholder="Re-enter your password">
+  
+  <button onclick="handleSignUp()">Create Account 🎉</button>
+  <button class="secondary" onclick="toggleAuth()">Already have an account? Sign In</button>
+</div>
+```
+
   </div>
 </div>
 
@@ -308,6 +333,7 @@ label {
     <button onclick="switchTab('nutrition')">🍎 Meal Plan</button>
     <button onclick="switchTab('workouts')">💪 Workouts</button>
     <button onclick="switchTab('tracking')">📈 Tracking</button>
+    <button onclick="switchTab('settings')">⚙️ Settings</button>
   </div>
 
   <div id="overview" class="tab active"></div>
@@ -315,6 +341,7 @@ label {
   <div id="nutrition" class="tab"></div>
   <div id="workouts" class="tab"></div>
   <div id="tracking" class="tab"></div>
+  <div id="settings" class="tab"></div>
 </div>
 
 </div>
@@ -328,28 +355,143 @@ const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 const load = k => JSON.parse(localStorage.getItem(k) || 'null');
 const today = () => new Date().toISOString().split('T')[0];
 
-/* =============== LOGIN =============== */
-function login() {
-  const emailInput = document.getElementById('email');
-  const email = emailInput.value.trim();
+/* =============== AUTHENTICATION =============== */
+function toggleAuth() {
+  const signinForm = document.getElementById('signinForm');
+  const signupForm = document.getElementById('signupForm');
+  const authTitle = document.getElementById('authTitle');
   
-  if (!email) {
-    alert('Please enter your email');
-    return;
-  }
-  
-  user.email = email;
-  const saved = load('user_' + email);
-  
-  if (saved && saved.onboardingComplete) {
-    user = saved;
-    show('dashboardPage');
-    loadDashboard();
+  if (signinForm.style.display === 'none') {
+    signinForm.style.display = 'block';
+    signupForm.style.display = 'none';
+    authTitle.innerText = 'Sign In';
   } else {
-    show('onboardingPage');
-    renderStep();
+    signinForm.style.display = 'none';
+    signupForm.style.display = 'block';
+    authTitle.innerText = 'Create Account';
   }
 }
+
+function handleSignUp() {
+  console.log('📝 Sign up initiated');
+  
+  try {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+    
+    // Validation
+    if (!email) {
+      alert('Please enter your email');
+      return;
+    }
+    
+    if (!isValidEmail(email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    
+    if (!password) {
+      alert('Please enter a password');
+      return;
+    }
+    
+    if (password.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    // Check if user already exists
+    const existingUser = load('user_' + email);
+    if (existingUser) {
+      alert('An account with this email already exists. Please sign in.');
+      toggleAuth();
+      return;
+    }
+    
+    // Create new user
+    user.email = email;
+    user.password = btoa(password); // Basic encoding (for demo - in production use proper hashing)
+    user.createdAt = new Date().toISOString();
+    
+    console.log('✅ Account created for:', email);
+    alert('Account created successfully! Let\'s set up your profile.');
+    
+    // Start onboarding
+    show('onboardingPage');
+    renderStep();
+    
+  } catch (error) {
+    console.error('❌ Sign up error:', error);
+    alert('Error creating account: ' + error.message);
+  }
+}
+
+function handleSignIn() {
+  console.log('🔐 Sign in initiated');
+  
+  try {
+    const email = document.getElementById('signinEmail').value.trim();
+    const password = document.getElementById('signinPassword').value;
+    
+    // Validation
+    if (!email) {
+      alert('Please enter your email');
+      return;
+    }
+    
+    if (!password) {
+      alert('Please enter your password');
+      return;
+    }
+    
+    // Check if user exists
+    const savedUser = load('user_' + email);
+    
+    if (!savedUser) {
+      alert('No account found with this email. Please sign up first.');
+      return;
+    }
+    
+    // Verify password
+    const storedPassword = savedUser.password;
+    const enteredPassword = btoa(password);
+    
+    if (storedPassword !== enteredPassword) {
+      alert('Incorrect password. Please try again.');
+      return;
+    }
+    
+    // Successful login
+    user = savedUser;
+    console.log('✅ Signed in as:', email);
+    
+    if (savedUser.onboardingComplete) {
+      show('dashboardPage');
+      loadDashboard();
+    } else {
+      // Resume onboarding if not complete
+      show('onboardingPage');
+      renderStep();
+    }
+    
+  } catch (error) {
+    console.error('❌ Sign in error:', error);
+    alert('Error signing in: ' + error.message);
+  }
+}
+
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Old login function removed - now using handleSignIn/handleSignUp
 
 function show(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -368,6 +510,7 @@ function switchTab(id) {
   if (id === 'nutrition') renderNutrition();
   if (id === 'workouts') renderWorkouts();
   if (id === 'tracking') renderTracking();
+  if (id === 'settings') renderSettings();
 }
 
 /* =============== ONBOARDING =============== */
@@ -636,20 +779,40 @@ const steps = [
 ];
 
 function renderStep() {
+console.log(‘📝 Rendering step:’, step, ‘of’, totalSteps);
+try {
 document.getElementById(‘progressFill’).style.width = ((step / totalSteps) * 100) + ‘%’;
 document.getElementById(‘onboardingCard’).innerHTML = steps[step]();
+console.log(‘✅ Step rendered successfully’);
+} catch (error) {
+console.error(‘❌ Error rendering step:’, error);
+alert(’Error rendering step: ’ + error.message);
+}
 }
 
 function next(fn) {
+console.log(‘➡️ Next button clicked, current step:’, step);
+try {
 if (fn) fn();
 step++;
-if (step >= steps.length) finish();
-else renderStep();
+console.log(‘📈 Moving to step:’, step);
+if (step >= steps.length) {
+console.log(‘🎉 Onboarding complete, calling finish()’);
+finish();
+} else {
+renderStep();
+}
+} catch (error) {
+console.error(‘❌ Error in next():’, error);
+alert(’Error: ’ + error.message);
+}
 }
 
 function prev() {
+console.log(‘⬅️ Back button clicked, current step:’, step);
 step–;
 if (step < 0) step = 0;
+console.log(‘📉 Moving to step:’, step);
 renderStep();
 }
 
@@ -1193,6 +1356,148 @@ tracking.innerHTML = `
 ```
 
 `;
+}
+
+/* =============== SETTINGS =============== */
+function renderSettings() {
+settings.innerHTML = `
+<div class="card">
+<h2>⚙️ Account Settings</h2>
+<p class="small">Manage your account and preferences</p>
+</div>
+
+```
+<div class="card">
+  <h3>👤 Account Information</h3>
+  <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+    <strong>Email:</strong> ${user.email}
+  </div>
+  <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+    <strong>Member Since:</strong> ${new Date(user.createdAt).toLocaleDateString()}
+  </div>
+</div>
+
+<div class="card">
+  <h3>🔐 Change Password</h3>
+  <label>Current Password</label>
+  <input id="currentPassword" type="password" placeholder="Enter current password">
+  
+  <label>New Password</label>
+  <input id="newPassword" type="password" placeholder="Enter new password (min 6 characters)">
+  
+  <label>Confirm New Password</label>
+  <input id="confirmNewPassword" type="password" placeholder="Re-enter new password">
+  
+  <button onclick="changePassword()">Update Password</button>
+</div>
+
+<div class="card">
+  <h3>🗑️ Account Actions</h3>
+  <button class="secondary" onclick="logout()">Logout</button>
+  <button class="secondary" onclick="if(confirm('Are you sure? This will delete all your data.')) deleteAccount()" style="background: #dc3545; margin-top: 20px;">
+    Delete Account
+  </button>
+</div>
+```
+
+`;
+}
+
+function changePassword() {
+console.log(‘🔐 Changing password’);
+
+try {
+const currentPassword = document.getElementById(‘currentPassword’).value;
+const newPassword = document.getElementById(‘newPassword’).value;
+const confirmNewPassword = document.getElementById(‘confirmNewPassword’).value;
+
+```
+if (!currentPassword || !newPassword || !confirmNewPassword) {
+  alert('Please fill in all password fields');
+  return;
+}
+
+// Verify current password
+const storedPassword = user.password;
+const enteredPassword = btoa(currentPassword);
+
+if (storedPassword !== enteredPassword) {
+  alert('Current password is incorrect');
+  return;
+}
+
+if (newPassword.length < 6) {
+  alert('New password must be at least 6 characters');
+  return;
+}
+
+if (newPassword !== confirmNewPassword) {
+  alert('New passwords do not match');
+  return;
+}
+
+// Update password
+user.password = btoa(newPassword);
+save('user_' + user.email, user);
+
+alert('Password updated successfully!');
+
+// Clear fields
+document.getElementById('currentPassword').value = '';
+document.getElementById('newPassword').value = '';
+document.getElementById('confirmNewPassword').value = '';
+
+console.log('✅ Password changed successfully');
+```
+
+} catch (error) {
+console.error(‘❌ Password change error:’, error);
+alert(’Error changing password: ’ + error.message);
+}
+}
+
+function logout() {
+console.log(‘👋 Logging out’);
+
+if (confirm(‘Are you sure you want to logout?’)) {
+user = {};
+step = 0;
+localStorage.removeItem(‘lastEmail’);
+
+```
+// Clear forms
+document.getElementById('signinEmail').value = '';
+document.getElementById('signinPassword').value = '';
+
+show('loginPage');
+console.log('✅ Logged out successfully');
+```
+
+}
+}
+
+function deleteAccount() {
+console.log(‘🗑️ Deleting account’);
+
+const email = user.email;
+
+// Delete all user data
+localStorage.removeItem(‘user_’ + email);
+localStorage.removeItem(‘lastEmail’);
+localStorage.removeItem(‘mealPlan’);
+localStorage.removeItem(‘workoutProgram’);
+localStorage.removeItem(‘workoutLogs’);
+localStorage.removeItem(‘weights’);
+localStorage.removeItem(‘water’);
+localStorage.removeItem(‘feedback’);
+
+alert(‘Your account and all data have been deleted.’);
+
+user = {};
+step = 0;
+
+show(‘loginPage’);
+console.log(‘✅ Account deleted’);
 }
 
 /* =============== INIT =============== */
