@@ -323,7 +323,6 @@ label {
 /* =============== STATE =============== */
 let user = {};
 let step = 0;
-const totalSteps = 5;
 
 const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
 const load = k => JSON.parse(localStorage.getItem(k) || 'null');
@@ -358,6 +357,8 @@ function show(id) {
 }
 
 function switchTab(id) {
+  console.log('🔄 Switching to tab:', id);
+  
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
@@ -370,580 +371,846 @@ function switchTab(id) {
 }
 
 /* =============== ONBOARDING =============== */
+const totalSteps = 8;
+
 const steps = [
+  // STEP 1: Basic Info
   () => `
-    <h2>What's your name?</h2>
-    <input id="n" placeholder="First name" value="${user.name || ''}">
-    <button onclick="next(() => user.name = n.value)">Continue</button>
-  `,
-  
-  () => `
-    <h2>Your Stats</h2>
-    <label>Current Weight (lbs)</label>
-    <input id="w" type="number" placeholder="150" value="${user.weight || ''}">
-    <label>Height (inches)</label>
-    <input id="h" type="number" placeholder="70" value="${user.height || ''}">
+    <h2>Step 1: Basic Information</h2>
+    <label>First Name</label>
+    <input id="name" placeholder="Enter your name" value="${user.name || ''}">
+    
     <label>Age</label>
-    <input id="a" type="number" placeholder="25" value="${user.age || ''}">
+    <input id="age" type="number" placeholder="25" value="${user.age || ''}">
+    
     <label>Gender</label>
-    <select id="g">
-      <option value="male">Male</option>
-      <option value="female">Female</option>
+    <select id="gender">
+      <option value="male" ${user.gender === 'male' ? 'selected' : ''}>Male</option>
+      <option value="female" ${user.gender === 'female' ? 'selected' : ''}>Female</option>
     </select>
-    <button onclick="next(() => {
-      user.weight = +w.value;
-      user.height = +h.value;
-      user.age = +a.value;
-      user.gender = g.value;
-    })">Continue</button>
-    <button class="secondary" onclick="prev()">Back</button>
-  `,
-  
-  () => `
-    <h2>Your Goal</h2>
-    <label>Primary Goal</label>
-    <select id="goal">
-      <option value="cut">🔥 Fat Loss</option>
-      <option value="maintain">⚖️ Maintain</option>
-      <option value="bulk">💪 Muscle Gain</option>
-    </select>
-    <label>Goal Weight (lbs)</label>
-    <input id="gw" type="number" placeholder="145" value="${user.goalWeight || ''}">
-    <button onclick="next(() => {
-      user.goal = goal.value;
-      user.goalWeight = +gw.value;
-    })">Continue</button>
-    <button class="secondary" onclick="prev()">Back</button>
-  `,
-  
-  () => `
-    <h2>Training Schedule</h2>
-    <label>Training Days Per Week</label>
-    <input type="range" min="2" max="6" value="${user.days || 4}" id="d" 
-           oninput="dv.innerText = d.value + ' days/week'">
-    <div id="dv" style="text-align: center; font-size: 24px; font-weight: bold; color: #FF6B35; margin: 15px 0;">
-      ${user.days || 4} days/week
+    
+    <label>Height</label>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <input id="heightFeet" type="number" placeholder="5" value="${user.heightFeet || ''}" min="3" max="8">
+      <input id="heightInches" type="number" placeholder="10" value="${user.heightInches || ''}" min="0" max="11">
     </div>
-    <label>Activity Level</label>
-    <select id="activity">
-      <option value="1.2">Sedentary</option>
-      <option value="1.375">Lightly Active</option>
-      <option value="1.55" selected>Moderately Active</option>
-      <option value="1.725">Very Active</option>
-    </select>
+    <p class="small">Feet and inches</p>
+    
     <button onclick="next(() => {
-      user.days = +d.value;
-      user.activityLevel = activity.value;
+      user.name = name.value;
+      user.age = +age.value;
+      user.gender = gender.value;
+      user.heightFeet = +heightFeet.value;
+      user.heightInches = +heightInches.value;
+      user.height = (user.heightFeet * 12) + user.heightInches;
+    })">Continue</button>
+  `,
+  
+  // STEP 2: Current Fitness
+  () => `
+    <h2>Step 2: Current Fitness</h2>
+    <label>Current Weight (lbs)</label>
+    <input id="weight" type="number" placeholder="180" value="${user.weight || ''}" step="0.1">
+    
+    <label>Activity Level</label>
+    <select id="activityLevel">
+      <option value="sedentary">Sedentary (little to no exercise)</option>
+      <option value="light">Lightly Active (1-3 days/week)</option>
+      <option value="moderate" selected>Moderately Active (3-5 days/week)</option>
+      <option value="very">Very Active (6-7 days/week)</option>
+      <option value="extreme">Extremely Active (athlete)</option>
+    </select>
+    
+    <button onclick="next(() => {
+      user.weight = +weight.value;
+      user.activityLevel = activityLevel.value;
     })">Continue</button>
     <button class="secondary" onclick="prev()">Back</button>
   `,
   
+  // STEP 3: Goals
   () => `
-    <h2>Equipment & Diet</h2>
-    <label>Available Equipment (Ctrl/Cmd for multiple)</label>
-    <select id="eq" multiple size="5" style="height: auto;">
-      <option value="bodyweight">🤸 Bodyweight</option>
+    <h2>Step 3: Your Goals</h2>
+    <label>Primary Goal</label>
+    <select id="primaryGoal">
+      <option value="weight-loss">🔥 Weight Loss</option>
+      <option value="muscle-gain">💪 Muscle Gain</option>
+      <option value="maintenance">⚖️ Maintain Weight</option>
+      <option value="athletic">🏃 Athletic Performance</option>
+    </select>
+    
+    <label>Goal Weight (lbs)</label>
+    <input id="goalWeight" type="number" placeholder="170" value="${user.goalWeight || ''}" step="0.1">
+    
+    <label>Timeline</label>
+    <select id="timeline">
+      <option value="3months">3 Months</option>
+      <option value="6months" selected>6 Months</option>
+      <option value="1year">1 Year</option>
+      <option value="ongoing">Ongoing Journey</option>
+    </select>
+    
+    <button onclick="next(() => {
+      user.primaryGoal = primaryGoal.value;
+      user.goalWeight = +goalWeight.value;
+      user.timeline = timeline.value;
+      user.goal = user.primaryGoal === 'weight-loss' ? 'cut' : user.primaryGoal === 'muscle-gain' ? 'bulk' : 'maintain';
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  // STEP 4: Workout Preferences
+  () => `
+    <h2>Step 4: Workout Preferences</h2>
+    <label>Training Days Per Week</label>
+    <input type="range" min="2" max="6" value="${user.workoutDays || 4}" id="workoutDays" 
+           oninput="wdDisplay.innerText = workoutDays.value + ' days/week'">
+    <div id="wdDisplay" style="text-align: center; font-size: 24px; font-weight: bold; color: #FF6B35; margin: 15px 0;">
+      ${user.workoutDays || 4} days/week
+    </div>
+    
+    <label>Workout Duration (minutes per session)</label>
+    <select id="workoutDuration">
+      <option value="30">30 minutes</option>
+      <option value="45" selected>45 minutes</option>
+      <option value="60">60 minutes</option>
+      <option value="90">90 minutes</option>
+    </select>
+    
+    <label>Workout Location (select all that apply)</label>
+    <select id="workoutLocations" multiple size="3" style="height: auto;">
+      <option value="home">🏠 Home</option>
+      <option value="gym">🏋️ Gym</option>
+      <option value="outdoor">🌳 Outdoor</option>
+    </select>
+    
+    <label>Available Equipment</label>
+    <select id="equipment" multiple size="5" style="height: auto;">
+      <option value="bodyweight">🤸 Bodyweight Only</option>
       <option value="dumbbells">🏋️ Dumbbells</option>
       <option value="barbells">💪 Barbells</option>
-      <option value="gym">🏢 Full Gym</option>
+      <option value="bands">🎀 Resistance Bands</option>
+      <option value="gym">🏢 Full Gym Access</option>
     </select>
-    <label>Dietary Preferences</label>
-    <select id="diet" multiple size="4" style="height: auto;">
+    <p class="small">Hold Ctrl/Cmd to select multiple</p>
+    
+    <button onclick="next(() => {
+      user.workoutDays = +workoutDays.value;
+      user.days = user.workoutDays;
+      user.workoutDuration = +workoutDuration.value;
+      const locSelect = document.getElementById('workoutLocations');
+      user.workoutLocations = [...locSelect.selectedOptions].map(o => o.value);
+      const eqSelect = document.getElementById('equipment');
+      user.equipment = [...eqSelect.selectedOptions].map(o => o.value);
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  // STEP 5: Nutrition Preferences
+  () => `
+    <h2>Step 5: Nutrition Preferences</h2>
+    <label>Dietary Type</label>
+    <select id="dietType" multiple size="5" style="height: auto;">
       <option value="none" selected>No Restrictions</option>
       <option value="vegetarian">🥗 Vegetarian</option>
+      <option value="vegan">🌱 Vegan</option>
       <option value="keto">🥑 Keto</option>
+      <option value="paleo">🥩 Paleo</option>
     </select>
-    <button onclick="finish()">Complete Setup 🎉</button>
-    <button class="secondary" onclick="prev()">Back</button>
-  `
+    
+    <label>Meals Per Day</label>
+    <select id="mealsPerDay">
+      <option value="2">2 meals</option>
+      <option value="3" selected>3 meals</option>
+      <option value="4">4 meals</option>
+      <option value="5">5 meals</option>
+    </select>
+    
+    <label>Food Allergies / Restrictions (optional)</label>
+    <textarea id="allergies" rows="3" placeholder="e.g., nuts, dairy, gluten">${user.allergies || ''}</textarea>
+
+```
+<button onclick="next(() => {
+  const dietSelect = document.getElementById('dietType');
+  user.diet = [...dietSelect.selectedOptions].map(o => o.value);
+  user.mealsPerDay = +mealsPerDay.value;
+  user.allergies = allergies.value;
+})">Continue</button>
+<button class="secondary" onclick="prev()">Back</button>
+```
+
+`,
+
+// STEP 6: Lifestyle & Schedule
+() => `
+<h2>Step 6: Lifestyle & Schedule</h2>
+<label>Work Schedule</label>
+<select id="workSchedule">
+<option value="9-5">9 AM - 5 PM</option>
+<option value="flexible">Flexible Hours</option>
+<option value="night">Night Shift</option>
+<option value="irregular">Irregular Schedule</option>
+</select>
+
+```
+<label>Preferred Workout Times</label>
+<select id="workoutTimes" multiple size="4" style="height: auto;">
+  <option value="early-morning">🌅 Early Morning (5-7 AM)</option>
+  <option value="morning">☀️ Morning (7-10 AM)</option>
+  <option value="afternoon">🌤️ Afternoon (12-3 PM)</option>
+  <option value="evening">🌆 Evening (5-8 PM)</option>
+</select>
+
+<label>Average Sleep (hours per night)</label>
+<input id="sleepHours" type="number" min="4" max="12" value="${user.sleepHours || 7}" step="0.5">
+
+<button onclick="next(() => {
+  user.workSchedule = workSchedule.value;
+  const wtSelect = document.getElementById('workoutTimes');
+  user.workoutTimes = [...wtSelect.selectedOptions].map(o => o.value);
+  user.sleepHours = +sleepHours.value;
+})">Continue</button>
+<button class="secondary" onclick="prev()">Back</button>
+```
+
+`,
+
+// STEP 7: Motivation & Mindset
+() => `
+<h2>Step 7: Motivation & Mindset</h2>
+<label>What motivates you most?</label>
+<textarea id="motivation" rows="4" placeholder="Tell us what drives you to reach your fitness goals...">${user.motivation || ‘’}</textarea>
+
+```
+<label>Biggest Barriers to Success</label>
+<select id="barriers" multiple size="4" style="height: auto;">
+  <option value="time">⏰ Lack of Time</option>
+  <option value="motivation">😴 Low Motivation</option>
+  <option value="knowledge">📚 Not Sure What to Do</option>
+  <option value="accountability">👥 Need Accountability</option>
+</select>
+
+<label>Learning Style</label>
+<select id="learningStyle">
+  <option value="visual">👁️ Visual (videos, images)</option>
+  <option value="reading">📖 Reading (written instructions)</option>
+  <option value="doing">🤸 Hands-on (learn by doing)</option>
+</select>
+
+<button onclick="next(() => {
+  user.motivation = motivation.value;
+  const barSelect = document.getElementById('barriers');
+  user.barriers = [...barSelect.selectedOptions].map(o => o.value);
+  user.learningStyle = learningStyle.value;
+})">Continue</button>
+<button class="secondary" onclick="prev()">Back</button>
+```
+
+`,
+
+// STEP 8: Medical & Final
+() => `
+<h2>Step 8: Medical & Final Details</h2>
+<label>Any Injuries or Physical Limitations?</label>
+<textarea id="injuries" rows="3" placeholder="e.g., knee issues, back pain, etc.">${user.injuries || ‘’}</textarea>
+
+```
+<label>Medical Conditions (optional)</label>
+<textarea id="medicalConditions" rows="3" placeholder="e.g., diabetes, heart conditions, etc.">${user.medicalConditions || ''}</textarea>
+
+<label>Additional Notes</label>
+<textarea id="additionalNotes" rows="3" placeholder="Anything else we should know?">${user.additionalNotes || ''}</textarea>
+
+<label>
+  <input type="checkbox" id="termsAgree" style="width: auto; margin-right: 10px;">
+  I understand this is for informational purposes only and not medical advice
+</label>
+
+<button onclick="if(termsAgree.checked) finish(); else alert('Please agree to terms');">
+  Complete Setup 🎉
+</button>
+<button class="secondary" onclick="prev()">Back</button>
+```
+
+`
 ];
 
 function renderStep() {
-  document.getElementById('progressFill').style.width = ((step / totalSteps) * 100) + '%';
-  document.getElementById('onboardingCard').innerHTML = steps[step]();
+document.getElementById(‘progressFill’).style.width = ((step / totalSteps) * 100) + ‘%’;
+document.getElementById(‘onboardingCard’).innerHTML = steps[step]();
 }
 
 function next(fn) {
-  if (fn) fn();
-  step++;
-  if (step >= steps.length) finish();
-  else renderStep();
+if (fn) fn();
+step++;
+if (step >= steps.length) finish();
+else renderStep();
 }
 
 function prev() {
-  step--;
-  if (step < 0) step = 0;
-  renderStep();
+step–;
+if (step < 0) step = 0;
+renderStep();
 }
 
 /* =============== CALCULATIONS =============== */
 function finish() {
-  const eqSelect = document.getElementById('eq');
-  user.equipment = eqSelect ? [...eqSelect.selectedOptions].map(o => o.value) : ['bodyweight'];
-  
-  const dietSelect = document.getElementById('diet');
-  user.diet = dietSelect ? [...dietSelect.selectedOptions].map(o => o.value) : ['none'];
-  
-  // BMR calculation
-  const kg = user.weight * 0.453592;
-  const cm = user.height * 2.54;
-  const bmr = user.gender === "male"
-    ? 10 * kg + 6.25 * cm - 5 * user.age + 5
-    : 10 * kg + 6.25 * cm - 5 * user.age - 161;
-  
-  user.tdee = Math.round(bmr * parseFloat(user.activityLevel));
-  user.calories = user.goal === "cut" ? user.tdee - 500 : user.goal === "bulk" ? user.tdee + 300 : user.tdee;
-  
-  // Macros
-  const ratio = {
-    cut: {p: 0.40, c: 0.30, f: 0.30},
-    maintain: {p: 0.30, c: 0.40, f: 0.30},
-    bulk: {p: 0.30, c: 0.50, f: 0.20}
-  }[user.goal];
-  
-  user.macros = {
-    protein: Math.round((user.calories * ratio.p) / 4),
-    carbs: Math.round((user.calories * ratio.c) / 4),
-    fats: Math.round((user.calories * ratio.f) / 9)
-  };
-  
-  user.startDate = today();
-  user.onboardingComplete = true;
-  save('user_' + user.email, user);
-  
-  generateMealPlan();
-  generateWorkoutPlan();
-  
-  show('dashboardPage');
-  loadDashboard();
+// Collect final step data
+user.injuries = document.getElementById(‘injuries’).value;
+user.medicalConditions = document.getElementById(‘medicalConditions’).value;
+user.additionalNotes = document.getElementById(‘additionalNotes’).value;
+
+console.log(‘📋 Complete user data:’, user);
+
+// Calculate activity multiplier
+const activityMultipliers = {
+‘sedentary’: 1.2,
+‘light’: 1.375,
+‘moderate’: 1.55,
+‘very’: 1.725,
+‘extreme’: 1.9
+};
+
+const activityMult = activityMultipliers[user.activityLevel] || 1.55;
+
+// BMR calculation (Mifflin-St Jeor)
+const kg = user.weight * 0.453592;
+const cm = user.height * 2.54;
+const bmr = user.gender === “male”
+? 10 * kg + 6.25 * cm - 5 * user.age + 5
+: 10 * kg + 6.25 * cm - 5 * user.age - 161;
+
+user.bmr = Math.round(bmr);
+user.tdee = Math.round(bmr * activityMult);
+
+// Calculate calorie target based on goal
+user.calories = user.goal === “cut”
+? user.tdee - 500
+: user.goal === “bulk”
+? user.tdee + 300
+: user.tdee;
+
+// Macro calculations
+const macroRatios = {
+cut: {p: 0.40, c: 0.30, f: 0.30},
+maintain: {p: 0.30, c: 0.40, f: 0.30},
+bulk: {p: 0.30, c: 0.50, f: 0.20}
+};
+
+const ratio = macroRatios[user.goal] || macroRatios.maintain;
+
+user.macros = {
+protein: Math.round((user.calories * ratio.p) / 4),
+carbs: Math.round((user.calories * ratio.c) / 4),
+fats: Math.round((user.calories * ratio.f) / 9)
+};
+
+user.startDate = today();
+user.onboardingComplete = true;
+user.createdAt = new Date().toISOString();
+
+save(‘user_’ + user.email, user);
+console.log(‘✅ User data saved:’, user);
+
+const mealPlan = generateMealPlan();
+console.log(‘✅ Meal plan generated:’, mealPlan);
+
+generateWorkoutPlan();
+console.log(‘✅ Workout plan generated’);
+
+show(‘dashboardPage’);
+loadDashboard();
 }
 
 /* =============== DASHBOARD =============== */
 function getSplit() {
-  if (user.days <= 3) return "Full Body";
-  if (user.days === 4) return "Upper/Lower";
-  return "Push/Pull/Legs";
+if (user.days <= 3) return “Full Body”;
+if (user.days === 4) return “Upper/Lower”;
+return “Push/Pull/Legs”;
 }
 
 function loadDashboard() {
-  const water = load("water")?.[today()] || 0;
-  const currentWeight = latestWeight() || user.weight;
-  const weightToGo = Math.abs(user.weight - user.goalWeight).toFixed(1);
-  
-  overview.innerHTML = `
-    <div class="card">
-      <h2>Welcome back, ${user.name}! 👋</h2>
-      <div>
-        <span class="badge">Started ${new Date(user.startDate).toLocaleDateString()}</span>
-        <span class="badge">${user.goal.toUpperCase()}</span>
-        <span class="badge">${getSplit()}</span>
-      </div>
-    </div>
+const water = load(“water”)?.[today()] || 0;
+const currentWeight = latestWeight() || user.weight;
+const weightToGo = Math.abs(user.weight - user.goalWeight).toFixed(1);
 
-    <div class="grid">
-      <div class="stat-box"><strong>${user.calories}</strong><span>Calories</span></div>
-      <div class="stat-box"><strong>${user.macros.protein}g</strong><span>Protein</span></div>
-      <div class="stat-box"><strong>${user.macros.carbs}g</strong><span>Carbs</span></div>
-      <div class="stat-box"><strong>${user.macros.fats}g</strong><span>Fats</span></div>
-    </div>
+overview.innerHTML = `
+<div class="card">
+<h2>Welcome back, ${user.name}! 👋</h2>
+<div>
+<span class="badge">Started ${new Date(user.startDate).toLocaleDateString()}</span>
+<span class="badge">${user.goal.toUpperCase()}</span>
+<span class="badge">${getSplit()}</span>
+</div>
+</div>
 
-    <div class="card">
-      <h3>💧 Water</h3>
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 32px; font-weight: bold; color: #FF6B35;" id="water">${water}</span>
-        <span>oz today</span>
-      </div>
-      <button class="small secondary" onclick="addWater(8)">+8 oz</button>
-    </div>
+```
+<div class="grid">
+  <div class="stat-box"><strong>${user.calories}</strong><span>Calories</span></div>
+  <div class="stat-box"><strong>${user.macros.protein}g</strong><span>Protein</span></div>
+  <div class="stat-box"><strong>${user.macros.carbs}g</strong><span>Carbs</span></div>
+  <div class="stat-box"><strong>${user.macros.fats}g</strong><span>Fats</span></div>
+</div>
 
-    <div class="card">
-      <h3>⚖️ Weight</h3>
-      <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
-        <input id="weightInput" type="number" step="0.1" placeholder="${currentWeight}">
-        <button class="small" onclick="logWeight()" style="width: auto;">Log</button>
-      </div>
-      <div style="margin-top: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
-        <div><strong class="small">Current</strong><div style="font-size: 24px; color: #FF6B35;">${currentWeight}</div></div>
-        <div><strong class="small">Goal</strong><div style="font-size: 24px; color: #FF6B35;">${user.goalWeight}</div></div>
-        <div><strong class="small">To Go</strong><div style="font-size: 24px; color: #FF6B35;">${weightToGo}</div></div>
-      </div>
-    </div>
-  `;
+<div class="card">
+  <h3>💧 Water</h3>
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <span style="font-size: 32px; font-weight: bold; color: #FF6B35;" id="water">${water}</span>
+    <span>oz today</span>
+  </div>
+  <button class="small secondary" onclick="addWater(8)">+8 oz</button>
+</div>
+
+<div class="card">
+  <h3>⚖️ Weight</h3>
+  <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+    <input id="weightInput" type="number" step="0.1" placeholder="${currentWeight}">
+    <button class="small" onclick="logWeight()" style="width: auto;">Log</button>
+  </div>
+  <div style="margin-top: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
+    <div><strong class="small">Current</strong><div style="font-size: 24px; color: #FF6B35;">${currentWeight}</div></div>
+    <div><strong class="small">Goal</strong><div style="font-size: 24px; color: #FF6B35;">${user.goalWeight}</div></div>
+    <div><strong class="small">To Go</strong><div style="font-size: 24px; color: #FF6B35;">${weightToGo}</div></div>
+  </div>
+</div>
+```
+
+`;
 }
 
 function addWater(oz) {
-  const w = load("water") || {};
-  w[today()] = (w[today()] || 0) + oz;
-  save("water", w);
-  document.getElementById("water").innerText = w[today()];
+const w = load(“water”) || {};
+w[today()] = (w[today()] || 0) + oz;
+save(“water”, w);
+document.getElementById(“water”).innerText = w[today()];
 }
 
 function logWeight() {
-  const v = +document.getElementById('weightInput').value;
-  if (!v) return alert('Enter weight');
-  const w = load("weights") || {};
-  w[today()] = v;
-  save("weights", w);
-  loadDashboard();
+const v = +document.getElementById(‘weightInput’).value;
+if (!v) return alert(‘Enter weight’);
+const w = load(“weights”) || {};
+w[today()] = v;
+save(“weights”, w);
+loadDashboard();
 }
 
 function latestWeight() {
-  const w = load("weights") || {};
-  const dates = Object.keys(w).sort();
-  return dates.length ? w[dates[dates.length - 1]] : null;
+const w = load(“weights”) || {};
+const dates = Object.keys(w).sort();
+return dates.length ? w[dates[dates.length - 1]] : null;
 }
 
 /* =============== ASSESSMENT =============== */
 function renderAssessment() {
-  assessment.innerHTML = `
-    <div class="card">
-      <h2>📋 Your Assessment</h2>
-      <p class="small">Generated from your onboarding</p>
-    </div>
+assessment.innerHTML = `
+<div class="card">
+<h2>📋 Complete Assessment</h2>
+<p class="small">Your personalized fitness profile from 8-step onboarding</p>
+</div>
 
-    <div class="assessment-card">
-      <h3>👤 Personal Info</h3>
-      <div class="assessment-grid">
-        <div class="assessment-item"><strong>Name</strong>${user.name}</div>
-        <div class="assessment-item"><strong>Age</strong>${user.age} years</div>
-        <div class="assessment-item"><strong>Gender</strong>${user.gender}</div>
-        <div class="assessment-item"><strong>Height</strong>${Math.floor(user.height/12)}'${user.height%12}"</div>
-      </div>
-    </div>
+```
+<div class="assessment-card">
+  <h3>👤 Personal Information</h3>
+  <div class="assessment-grid">
+    <div class="assessment-item"><strong>Name</strong>${user.name}</div>
+    <div class="assessment-item"><strong>Age</strong>${user.age} years</div>
+    <div class="assessment-item"><strong>Gender</strong>${user.gender}</div>
+    <div class="assessment-item"><strong>Height</strong>${user.heightFeet}'${user.heightInches}"</div>
+  </div>
+</div>
 
-    <div class="assessment-card">
-      <h3>🎯 Goals</h3>
-      <div class="assessment-grid">
-        <div class="assessment-item"><strong>Goal</strong>${user.goal === 'cut' ? '🔥 Fat Loss' : user.goal === 'bulk' ? '💪 Muscle Gain' : '⚖️ Maintain'}</div>
-        <div class="assessment-item"><strong>Start Weight</strong>${user.weight} lbs</div>
-        <div class="assessment-item"><strong>Goal Weight</strong>${user.goalWeight} lbs</div>
-        <div class="assessment-item"><strong>To Go</strong>${Math.abs(user.weight - user.goalWeight).toFixed(1)} lbs</div>
-      </div>
-    </div>
+<div class="assessment-card">
+  <h3>💪 Current Fitness</h3>
+  <div class="assessment-grid">
+    <div class="assessment-item"><strong>Current Weight</strong>${user.weight} lbs</div>
+    <div class="assessment-item"><strong>Activity Level</strong>${user.activityLevel}</div>
+    <div class="assessment-item"><strong>BMR</strong>${user.bmr || '--'} kcal</div>
+    <div class="assessment-item"><strong>TDEE</strong>${user.tdee} kcal</div>
+  </div>
+</div>
 
-    <div class="assessment-card">
-      <h3>🏋️ Training</h3>
-      <div class="assessment-grid">
-        <div class="assessment-item"><strong>Days/Week</strong>${user.days}</div>
-        <div class="assessment-item"><strong>Split</strong>${getSplit()}</div>
-        <div class="assessment-item"><strong>Equipment</strong>${user.equipment.join(', ')}</div>
-      </div>
-    </div>
+<div class="assessment-card">
+  <h3>🎯 Goals & Timeline</h3>
+  <div class="assessment-grid">
+    <div class="assessment-item"><strong>Primary Goal</strong>${user.primaryGoal}</div>
+    <div class="assessment-item"><strong>Goal Weight</strong>${user.goalWeight} lbs</div>
+    <div class="assessment-item"><strong>To Lose/Gain</strong>${Math.abs(user.weight - user.goalWeight).toFixed(1)} lbs</div>
+    <div class="assessment-item"><strong>Timeline</strong>${user.timeline}</div>
+  </div>
+</div>
 
-    <div class="assessment-card">
-      <h3>🍎 Nutrition</h3>
-      <div class="assessment-grid">
-        <div class="assessment-item"><strong>Calories</strong>${user.calories} kcal</div>
-        <div class="assessment-item"><strong>Protein</strong>${user.macros.protein}g</div>
-        <div class="assessment-item"><strong>Carbs</strong>${user.macros.carbs}g</div>
-        <div class="assessment-item"><strong>Fats</strong>${user.macros.fats}g</div>
-        <div class="assessment-item"><strong>TDEE</strong>${user.tdee} kcal</div>
-        <div class="assessment-item"><strong>Diet</strong>${user.diet.join(', ')}</div>
-      </div>
-    </div>
-  `;
+<div class="assessment-card">
+  <h3>🏋️ Workout Plan</h3>
+  <div class="assessment-grid">
+    <div class="assessment-item"><strong>Days/Week</strong>${user.workoutDays} days</div>
+    <div class="assessment-item"><strong>Duration</strong>${user.workoutDuration} min/session</div>
+    <div class="assessment-item"><strong>Split</strong>${getSplit()}</div>
+    <div class="assessment-item"><strong>Locations</strong>${user.workoutLocations ? user.workoutLocations.join(', ') : 'N/A'}</div>
+  </div>
+  <div style="margin-top: 15px;">
+    <strong style="color: #FF6B35;">Equipment:</strong> ${user.equipment.join(', ')}
+  </div>
+</div>
+
+<div class="assessment-card">
+  <h3>🍎 Nutrition Plan</h3>
+  <div class="assessment-grid">
+    <div class="assessment-item"><strong>Daily Calories</strong>${user.calories} kcal</div>
+    <div class="assessment-item"><strong>Protein</strong>${user.macros.protein}g (${Math.round((user.macros.protein * 4 / user.calories) * 100)}%)</div>
+    <div class="assessment-item"><strong>Carbs</strong>${user.macros.carbs}g (${Math.round((user.macros.carbs * 4 / user.calories) * 100)}%)</div>
+    <div class="assessment-item"><strong>Fats</strong>${user.macros.fats}g (${Math.round((user.macros.fats * 9 / user.calories) * 100)}%)</div>
+    <div class="assessment-item"><strong>Diet Type</strong>${user.diet.join(', ')}</div>
+    <div class="assessment-item"><strong>Meals/Day</strong>${user.mealsPerDay}</div>
+  </div>
+  ${user.allergies ? `<div style="margin-top: 15px;"><strong style="color: #FF6B35;">Allergies:</strong> ${user.allergies}</div>` : ''}
+</div>
+
+<div class="assessment-card">
+  <h3>⏰ Lifestyle & Schedule</h3>
+  <div class="assessment-grid">
+    <div class="assessment-item"><strong>Work Schedule</strong>${user.workSchedule}</div>
+    <div class="assessment-item"><strong>Sleep</strong>${user.sleepHours} hours/night</div>
+    <div class="assessment-item"><strong>Learning Style</strong>${user.learningStyle || 'N/A'}</div>
+  </div>
+  <div style="margin-top: 15px;">
+    <strong style="color: #FF6B35;">Preferred Workout Times:</strong> ${user.workoutTimes ? user.workoutTimes.join(', ') : 'N/A'}
+  </div>
+  ${user.barriers ? `<div style="margin-top: 10px;"><strong style="color: #FF6B35;">Barriers:</strong> ${user.barriers.join(', ')}</div>` : ''}
+</div>
+
+<div class="assessment-card">
+  <h3>💭 Motivation & Health</h3>
+  ${user.motivation ? `<div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><strong>Motivation:</strong><br>${user.motivation}</div>` : ''}
+  ${user.injuries ? `<div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><strong>Injuries/Limitations:</strong><br>${user.injuries}</div>` : ''}
+  ${user.medicalConditions ? `<div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><strong>Medical Conditions:</strong><br>${user.medicalConditions}</div>` : ''}
+  ${user.additionalNotes ? `<div style="background: white; padding: 15px; border-radius: 8px;"><strong>Additional Notes:</strong><br>${user.additionalNotes}</div>` : ''}
+</div>
+```
+
+`;
 }
 
 /* =============== FOOD & RECIPES =============== */
 const FOODS = [
-  {n:"Egg Whites",p:11,c:2,f:0,u:"cup"},
-  {n:"Chicken Breast",p:31,c:0,f:3,u:"4oz"},
-  {n:"Lean Turkey",p:22,c:0,f:8,u:"4oz"},
-  {n:"Salmon",p:22,c:0,f:12,u:"4oz"},
-  {n:"Greek Yogurt",p:17,c:6,f:0,u:"cup"},
-  {n:"Brown Rice",p:5,c:45,f:2,u:"cup"},
-  {n:"Oats",p:10,c:54,f:6,u:"cup"},
-  {n:"Sweet Potato",p:4,c:41,f:0,u:"medium"},
-  {n:"Broccoli",p:4,c:11,f:0,u:"cup"},
-  {n:"Spinach",p:2,c:4,f:0,u:"cup"},
-  {n:"Avocado",p:3,c:12,f:21,u:"whole"},
-  {n:"Olive Oil",p:0,c:0,f:14,u:"tbsp"},
-  {n:"Banana",p:1,c:27,f:0,u:"medium"},
-  {n:"Whey Protein",p:24,c:3,f:1,u:"scoop"}
+{n:“Egg Whites”,p:11,c:2,f:0,u:“cup”},
+{n:“Chicken Breast”,p:31,c:0,f:3,u:“4oz”},
+{n:“Lean Turkey”,p:22,c:0,f:8,u:“4oz”},
+{n:“Salmon”,p:22,c:0,f:12,u:“4oz”},
+{n:“Greek Yogurt”,p:17,c:6,f:0,u:“cup”},
+{n:“Brown Rice”,p:5,c:45,f:2,u:“cup”},
+{n:“Oats”,p:10,c:54,f:6,u:“cup”},
+{n:“Sweet Potato”,p:4,c:41,f:0,u:“medium”},
+{n:“Broccoli”,p:4,c:11,f:0,u:“cup”},
+{n:“Spinach”,p:2,c:4,f:0,u:“cup”},
+{n:“Avocado”,p:3,c:12,f:21,u:“whole”},
+{n:“Olive Oil”,p:0,c:0,f:14,u:“tbsp”},
+{n:“Banana”,p:1,c:27,f:0,u:“medium”},
+{n:“Whey Protein”,p:24,c:3,f:1,u:“scoop”}
 ];
 
 const food = n => FOODS.find(f => f.n === n);
 
 const RECIPES = [
-  {
-    id:"egg_scramble", meal:"breakfast", goal:["cut","maintain"],
-    name:"Egg White Scramble",
-    ingredients:[{food:"Egg Whites",s:1.5},{food:"Spinach",s:1},{food:"Olive Oil",s:0.25}],
-    steps:["Heat oil","Cook eggs","Add spinach"]
-  },
-  {
-    id:"yogurt_bowl", meal:"breakfast", goal:["maintain","bulk"],
-    name:"Greek Yogurt Bowl",
-    ingredients:[{food:"Greek Yogurt",s:1.5},{food:"Banana",s:1}],
-    steps:["Layer yogurt","Top with banana"]
-  },
-  {
-    id:"chicken_rice", meal:"lunch", goal:["cut","maintain","bulk"],
-    name:"Chicken & Rice",
-    ingredients:[{food:"Chicken Breast",s:1.5},{food:"Brown Rice",s:1},{food:"Broccoli",s:1}],
-    steps:["Grill chicken","Cook rice","Steam broccoli","Combine"]
-  },
-  {
-    id:"turkey_potato", meal:"dinner", goal:["cut","maintain","bulk"],
-    name:"Turkey & Sweet Potato",
-    ingredients:[{food:"Lean Turkey",s:1.5},{food:"Sweet Potato",s:2},{food:"Spinach",s:1}],
-    steps:["Brown turkey","Roast potato","Sauté spinach"]
-  },
-  {
-    id:"salmon_veg", meal:"dinner", goal:["maintain","bulk"],
-    name:"Salmon & Veggies",
-    ingredients:[{food:"Salmon",s:1.5},{food:"Broccoli",s:1.5},{food:"Olive Oil",s:0.5}],
-    steps:["Bake salmon","Steam broccoli","Drizzle oil"]
-  }
+{
+id:“egg_scramble”, meal:“breakfast”, goal:[“cut”,“maintain”],
+name:“Egg White Scramble”,
+ingredients:[{food:“Egg Whites”,s:1.5},{food:“Spinach”,s:1},{food:“Olive Oil”,s:0.25}],
+steps:[“Heat oil”,“Cook eggs”,“Add spinach”]
+},
+{
+id:“yogurt_bowl”, meal:“breakfast”, goal:[“maintain”,“bulk”],
+name:“Greek Yogurt Bowl”,
+ingredients:[{food:“Greek Yogurt”,s:1.5},{food:“Banana”,s:1}],
+steps:[“Layer yogurt”,“Top with banana”]
+},
+{
+id:“chicken_rice”, meal:“lunch”, goal:[“cut”,“maintain”,“bulk”],
+name:“Chicken & Rice”,
+ingredients:[{food:“Chicken Breast”,s:1.5},{food:“Brown Rice”,s:1},{food:“Broccoli”,s:1}],
+steps:[“Grill chicken”,“Cook rice”,“Steam broccoli”,“Combine”]
+},
+{
+id:“turkey_potato”, meal:“dinner”, goal:[“cut”,“maintain”,“bulk”],
+name:“Turkey & Sweet Potato”,
+ingredients:[{food:“Lean Turkey”,s:1.5},{food:“Sweet Potato”,s:2},{food:“Spinach”,s:1}],
+steps:[“Brown turkey”,“Roast potato”,“Sauté spinach”]
+},
+{
+id:“salmon_veg”, meal:“dinner”, goal:[“maintain”,“bulk”],
+name:“Salmon & Veggies”,
+ingredients:[{food:“Salmon”,s:1.5},{food:“Broccoli”,s:1.5},{food:“Olive Oil”,s:0.5}],
+steps:[“Bake salmon”,“Steam broccoli”,“Drizzle oil”]
+}
 ];
 
 function macros(recipe) {
-  return recipe.ingredients.reduce((t, i) => {
-    const f = food(i.food);
-    t.p += f.p * i.s;
-    t.c += f.c * i.s;
-    t.f += f.f * i.s;
-    return t;
-  }, {p:0, c:0, f:0});
+return recipe.ingredients.reduce((t, i) => {
+const f = food(i.food);
+t.p += f.p * i.s;
+t.c += f.c * i.s;
+t.f += f.f * i.s;
+return t;
+}, {p:0, c:0, f:0});
 }
 
 function generateMealPlan() {
-  const feedback = load("feedback") || {};
-  const pool = RECIPES.filter(r => r.goal.includes(user.goal) && feedback[r.id] !== "dislike");
-  
-  const plan = [];
-  for (let w = 0; w < 4; w++) {
-    const week = [];
-    for (let d = 0; d < 7; d++) {
-      const day = {};
-      ["breakfast", "lunch", "dinner"].forEach(meal => {
-        const opts = pool.filter(r => r.meal === meal);
-        if (opts.length > 0) day[meal] = opts[Math.floor(Math.random() * opts.length)];
-      });
-      week.push(day);
-    }
-    plan.push(week);
-  }
-  
-  save("mealPlan", plan);
-  return plan;
+const feedback = load(“feedback”) || {};
+const pool = RECIPES.filter(r => r.goal.includes(user.goal) && feedback[r.id] !== “dislike”);
+
+const plan = [];
+for (let w = 0; w < 4; w++) {
+const week = [];
+for (let d = 0; d < 7; d++) {
+const day = {};
+[“breakfast”, “lunch”, “dinner”].forEach(meal => {
+const opts = pool.filter(r => r.meal === meal);
+if (opts.length > 0) day[meal] = opts[Math.floor(Math.random() * opts.length)];
+});
+week.push(day);
+}
+plan.push(week);
+}
+
+save(“mealPlan”, plan);
+return plan;
 }
 
 function rate(id, val) {
-  const f = load("feedback") || {};
-  f[id] = val;
-  save("feedback", f);
-  generateMealPlan();
-  renderNutrition();
+const f = load(“feedback”) || {};
+f[id] = val;
+save(“feedback”, f);
+generateMealPlan();
+renderNutrition();
 }
 
 function grocery(week) {
-  const g = {};
-  week.forEach(day => {
-    Object.values(day).forEach(recipe => {
-      if (recipe) recipe.ingredients.forEach(i => g[i.food] = (g[i.food] || 0) + i.s);
-    });
-  });
-  return g;
+const g = {};
+week.forEach(day => {
+Object.values(day).forEach(recipe => {
+if (recipe) recipe.ingredients.forEach(i => g[i.food] = (g[i.food] || 0) + i.s);
+});
+});
+return g;
 }
 
 function renderNutrition() {
-  let plan = load("mealPlan");
-  if (!plan) plan = generateMealPlan();
+console.log(‘📋 Rendering nutrition, user:’, user);
+
+let plan = load(“mealPlan”);
+console.log(‘📋 Loaded meal plan:’, plan);
+
+if (!plan) {
+console.log(‘📋 No meal plan found, generating…’);
+plan = generateMealPlan();
+}
+
+if (!plan || plan.length === 0) {
+nutrition.innerHTML = ‘<div class="card"><h2>⚠️ No meal plan generated</h2><p>Please complete onboarding first.</p></div>’;
+return;
+}
+
+nutrition.innerHTML = `<div class="card"> <h2>🍎 28-Day Meal Plan</h2> <p class="small">Personalized for ${user.goal} • ${user.calories} cal/day</p> </div>`;
+
+plan.forEach((week, i) => {
+nutrition.innerHTML += `<div class="week"><h3>Week ${i + 1}</h3>`;
+
+```
+week.forEach((day, d) => {
+  nutrition.innerHTML += `<h4 style="margin-top: 20px; color: #333;">Day ${d + 1}</h4>`;
   
-  nutrition.innerHTML = `
-    <div class="card">
-      <h2>🍎 28-Day Meal Plan</h2>
-      <p class="small">Personalized for ${user.goal} • ${user.calories} cal/day</p>
-    </div>
-  `;
-  
-  plan.forEach((week, i) => {
-    nutrition.innerHTML += `<div class="week"><h3>Week ${i + 1}</h3>`;
+  Object.values(day).forEach(recipe => {
+    if (!recipe) return;
+    const m = macros(recipe);
+    const cals = Math.round(m.p * 4 + m.c * 4 + m.f * 9);
     
-    week.forEach((day, d) => {
-      nutrition.innerHTML += `<h4 style="margin-top: 20px; color: #333;">Day ${d + 1}</h4>`;
-      
-      Object.values(day).forEach(recipe => {
-        if (!recipe) return;
-        const m = macros(recipe);
-        const cals = Math.round(m.p * 4 + m.c * 4 + m.f * 9);
-        
-        nutrition.innerHTML += `
-          <div class="meal">
-            <div style="display: flex; justify-content: space-between;">
-              <strong style="font-size: 18px;">${recipe.name}</strong>
-              <strong>${cals} cal</strong>
-            </div>
-            <div style="margin: 10px 0;">
-              <span class="macro protein">${Math.round(m.p)}P</span>
-              <span class="macro carbs">${Math.round(m.c)}C</span>
-              <span class="macro fats">${Math.round(m.f)}F</span>
-            </div>
-            <p class="small">${recipe.steps.join(" → ")}</p>
-            <button class="small" onclick="rate('${recipe.id}','like')">👍</button>
-            <button class="small secondary" onclick="rate('${recipe.id}','dislike')">👎</button>
-          </div>
-        `;
-      });
-    });
-    
-    const g = grocery(week);
     nutrition.innerHTML += `
-      <div class="grocery-section">
-        <h4>🛒 Grocery List</h4>
-        ${Object.keys(g).map(k => `
-          <div class="grocery-item">
-            <span>${k}</span>
-            <strong>${g[k].toFixed(1)} ${food(k).u}</strong>
-          </div>
-        `).join('')}
+      <div class="meal">
+        <div style="display: flex; justify-content: space-between;">
+          <strong style="font-size: 18px;">${recipe.name}</strong>
+          <strong>${cals} cal</strong>
+        </div>
+        <div style="margin: 10px 0;">
+          <span class="macro protein">${Math.round(m.p)}P</span>
+          <span class="macro carbs">${Math.round(m.c)}C</span>
+          <span class="macro fats">${Math.round(m.f)}F</span>
+        </div>
+        <p class="small">${recipe.steps.join(" → ")}</p>
+        <button class="small" onclick="rate('${recipe.id}','like')">👍</button>
+        <button class="small secondary" onclick="rate('${recipe.id}','dislike')">👎</button>
       </div>
     `;
-    
-    nutrition.innerHTML += `</div>`;
   });
+});
+
+const g = grocery(week);
+nutrition.innerHTML += `
+  <div class="grocery-section">
+    <h4>🛒 Grocery List</h4>
+    ${Object.keys(g).map(k => `
+      <div class="grocery-item">
+        <span>${k}</span>
+        <strong>${g[k].toFixed(1)} ${food(k).u}</strong>
+      </div>
+    `).join('')}
+  </div>
+`;
+
+nutrition.innerHTML += `</div>`;
+```
+
+});
 }
 
 /* =============== WORKOUTS =============== */
 const EXERCISES = {
-  fullbody: ["Squat", "Bench Press", "Deadlift", "Overhead Press", "Row"],
-  upper: ["Bench Press", "Row", "Overhead Press", "Pull-Ups", "Dips"],
-  lower: ["Squat", "Deadlift", "Leg Press", "Leg Curl", "Calf Raises"],
-  push: ["Bench Press", "Incline Press", "Overhead Press", "Tricep Dips"],
-  pull: ["Deadlift", "Pull-Ups", "Barbell Row", "Face Pulls", "Curls"],
-  legs: ["Squat", "Leg Press", "Leg Curl", "Calf Raises", "Lunges"]
+fullbody: [“Squat”, “Bench Press”, “Deadlift”, “Overhead Press”, “Row”],
+upper: [“Bench Press”, “Row”, “Overhead Press”, “Pull-Ups”, “Dips”],
+lower: [“Squat”, “Deadlift”, “Leg Press”, “Leg Curl”, “Calf Raises”],
+push: [“Bench Press”, “Incline Press”, “Overhead Press”, “Tricep Dips”],
+pull: [“Deadlift”, “Pull-Ups”, “Barbell Row”, “Face Pulls”, “Curls”],
+legs: [“Squat”, “Leg Press”, “Leg Curl”, “Calf Raises”, “Lunges”]
 };
 
 function generateWorkoutPlan() {
-  let program = {};
-  
-  if (user.days <= 3) {
-    program = {
-      "Day A": EXERCISES.fullbody,
-      "Day B": EXERCISES.fullbody.reverse()
-    };
-  } else if (user.days === 4) {
-    program = {
-      "Upper": EXERCISES.upper,
-      "Lower": EXERCISES.lower
-    };
-  } else {
-    program = {
-      "Push": EXERCISES.push,
-      "Pull": EXERCISES.pull,
-      "Legs": EXERCISES.legs
-    };
-  }
-  
-  save("workoutProgram", program);
+let program = {};
+
+if (user.days <= 3) {
+program = {
+“Day A”: EXERCISES.fullbody,
+“Day B”: EXERCISES.fullbody.reverse()
+};
+} else if (user.days === 4) {
+program = {
+“Upper”: EXERCISES.upper,
+“Lower”: EXERCISES.lower
+};
+} else {
+program = {
+“Push”: EXERCISES.push,
+“Pull”: EXERCISES.pull,
+“Legs”: EXERCISES.legs
+};
+}
+
+save(“workoutProgram”, program);
 }
 
 function renderWorkouts() {
-  const program = load("workoutProgram") || {};
-  const logs = load("workoutLogs") || {};
+console.log(‘💪 Rendering workouts, user:’, user);
+
+let program = load(“workoutProgram”);
+console.log(‘💪 Loaded workout program:’, program);
+
+if (!program || Object.keys(program).length === 0) {
+console.log(‘💪 No workout program found, generating…’);
+generateWorkoutPlan();
+program = load(“workoutProgram”);
+}
+
+const logs = load(“workoutLogs”) || {};
+
+workouts.innerHTML = `<div class="card"> <h2>💪 ${getSplit()} Training</h2> <p class="small">${user.days} days/week</p> </div>`;
+
+Object.keys(program).forEach(day => {
+workouts.innerHTML += `<div class="week"><h3>${day}</h3>`;
+
+```
+program[day].forEach(ex => {
+  const history = logs[ex] || [];
+  const last = history[history.length - 1];
   
-  workouts.innerHTML = `
-    <div class="card">
-      <h2>💪 ${getSplit()} Training</h2>
-      <p class="small">${user.days} days/week</p>
+  workouts.innerHTML += `
+    <div class="exercise">
+      <div style="display: flex; justify-content: space-between;">
+        <strong style="font-size: 18px;">${ex}</strong>
+        ${last ? `<span class="small">Last: ${last.weight} lbs × ${last.reps}</span>` : ''}
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
+        <input id="${day}_${ex}_w" type="number" placeholder="Weight">
+        <input id="${day}_${ex}_r" type="number" placeholder="Reps">
+      </div>
+      <button class="small" onclick="logSet('${ex}','${day}')">Log Set</button>
     </div>
   `;
-  
-  Object.keys(program).forEach(day => {
-    workouts.innerHTML += `<div class="week"><h3>${day}</h3>`;
-    
-    program[day].forEach(ex => {
-      const history = logs[ex] || [];
-      const last = history[history.length - 1];
-      
-      workouts.innerHTML += `
-        <div class="exercise">
-          <div style="display: flex; justify-content: space-between;">
-            <strong style="font-size: 18px;">${ex}</strong>
-            ${last ? `<span class="small">Last: ${last.weight} lbs × ${last.reps}</span>` : ''}
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
-            <input id="${day}_${ex}_w" type="number" placeholder="Weight">
-            <input id="${day}_${ex}_r" type="number" placeholder="Reps">
-          </div>
-          <button class="small" onclick="logSet('${ex}','${day}')">Log Set</button>
-        </div>
-      `;
-    });
-    
-    workouts.innerHTML += `</div>`;
-  });
+});
+
+workouts.innerHTML += `</div>`;
+```
+
+});
 }
 
 function logSet(ex, day) {
-  const w = document.getElementById(`${day}_${ex}_w`).value;
-  const r = document.getElementById(`${day}_${ex}_r`).value;
-  if (!w || !r) return alert('Enter weight and reps');
-  
-  const logs = load("workoutLogs") || {};
-  logs[ex] = logs[ex] || [];
-  logs[ex].push({date: today(), weight: w, reps: r});
-  save("workoutLogs", logs);
-  renderWorkouts();
+const w = document.getElementById(`${day}_${ex}_w`).value;
+const r = document.getElementById(`${day}_${ex}_r`).value;
+if (!w || !r) return alert(‘Enter weight and reps’);
+
+const logs = load(“workoutLogs”) || {};
+logs[ex] = logs[ex] || [];
+logs[ex].push({date: today(), weight: w, reps: r});
+save(“workoutLogs”, logs);
+renderWorkouts();
 }
 
 /* =============== TRACKING =============== */
 function renderTracking() {
-  const weights = load("weights") || {};
-  const water = load("water") || {};
-  
-  const weightEntries = Object.entries(weights).sort().reverse().slice(0, 10);
-  const waterEntries = Object.entries(water).sort().reverse().slice(0, 7);
-  
-  tracking.innerHTML = `
-    <div class="card">
-      <h2>📈 Progress Tracking</h2>
+const weights = load(“weights”) || {};
+const water = load(“water”) || {};
+
+const weightEntries = Object.entries(weights).sort().reverse().slice(0, 10);
+const waterEntries = Object.entries(water).sort().reverse().slice(0, 7);
+
+tracking.innerHTML = `
+<div class="card">
+<h2>📈 Progress Tracking</h2>
+</div>
+
+```
+<div class="week">
+  <h3>⚖️ Weight History</h3>
+  ${weightEntries.length > 0 ? weightEntries.map(([date, weight]) => `
+    <div class="weight-entry">
+      <span>${date}</span>
+      <strong style="color: #FF6B35;">${weight} lbs</strong>
     </div>
-    
-    <div class="week">
-      <h3>⚖️ Weight History</h3>
-      ${weightEntries.length > 0 ? weightEntries.map(([date, weight]) => `
-        <div class="weight-entry">
-          <span>${date}</span>
-          <strong style="color: #FF6B35;">${weight} lbs</strong>
-        </div>
-      `).join('') : '<p class="small">No weight logs yet</p>'}
+  `).join('') : '<p class="small">No weight logs yet</p>'}
+</div>
+
+<div class="week">
+  <h3>💧 Water Intake</h3>
+  ${waterEntries.length > 0 ? waterEntries.map(([date, oz]) => `
+    <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+        <span>${date}</span>
+        <strong style="color: #FF6B35;">${oz} oz</strong>
+      </div>
+      <div class="progress-bar" style="margin: 0;">
+        <div class="progress-fill" style="width: ${Math.min(oz, 100)}%"></div>
+      </div>
     </div>
-    
-    <div class="week">
-      <h3>💧 Water Intake</h3>
-      ${waterEntries.length > 0 ? waterEntries.map(([date, oz]) => `
-        <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-            <span>${date}</span>
-            <strong style="color: #FF6B35;">${oz} oz</strong>
-          </div>
-          <div class="progress-bar" style="margin: 0;">
-            <div class="progress-fill" style="width: ${Math.min(oz, 100)}%"></div>
-          </div>
-        </div>
-      `).join('') : '<p class="small">No water logs yet</p>'}
-    </div>
-  `;
+  `).join('') : '<p class="small">No water logs yet</p>'}
+</div>
+```
+
+`;
 }
 
 /* =============== INIT =============== */
 window.onload = function() {
-  const lastEmail = load('lastEmail');
-  if (lastEmail) {
-    const savedUser = load('user_' + lastEmail);
-    if (savedUser && savedUser.onboardingComplete) {
-      document.getElementById('email').value = lastEmail;
-      user = savedUser;
-      show('dashboardPage');
-      loadDashboard();
-    }
-  }
+const lastEmail = load(‘lastEmail’);
+if (lastEmail) {
+const savedUser = load(‘user_’ + lastEmail);
+if (savedUser && savedUser.onboardingComplete) {
+document.getElementById(‘email’).value = lastEmail;
+user = savedUser;
+show(‘dashboardPage’);
+loadDashboard();
+}
+}
 };
 
-window.addEventListener('beforeunload', () => {
-  if (user.email) save('lastEmail', user.email);
+window.addEventListener(‘beforeunload’, () => {
+if (user.email) save(‘lastEmail’, user.email);
 });
 </script>
 
