@@ -323,8 +323,11 @@ label {
 <!-- DASHBOARD PAGE -->
 
 <div id="dashboardPage" class="page">
-  <div class="card" style="background: white;">
+  <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
     <h1 style="margin: 0;">THE LAST COACH 💪</h1>
+    <button class="secondary small" onclick="logout()" style="background: #dc3545; color: white; margin: 0;">
+      🚪 Logout
+    </button>
   </div>
 
   <div class="nav">
@@ -357,18 +360,38 @@ const today = () => new Date().toISOString().split('T')[0];
 
 /* =============== AUTHENTICATION =============== */
 function toggleAuth() {
-  const signinForm = document.getElementById('signinForm');
-  const signupForm = document.getElementById('signupForm');
-  const authTitle = document.getElementById('authTitle');
+  console.log('🔄 Toggle auth clicked');
   
-  if (signinForm.style.display === 'none') {
-    signinForm.style.display = 'block';
-    signupForm.style.display = 'none';
-    authTitle.innerText = 'Sign In';
-  } else {
-    signinForm.style.display = 'none';
-    signupForm.style.display = 'block';
-    authTitle.innerText = 'Create Account';
+  try {
+    const signinForm = document.getElementById('signinForm');
+    const signupForm = document.getElementById('signupForm');
+    const authTitle = document.getElementById('authTitle');
+    
+    console.log('Form elements:', {signinForm, signupForm, authTitle});
+    
+    if (!signinForm || !signupForm || !authTitle) {
+      console.error('❌ Form elements not found!');
+      alert('Error: Forms not found. Please refresh the page.');
+      return;
+    }
+    
+    if (signinForm.style.display === 'none') {
+      console.log('Switching to Sign In');
+      signinForm.style.display = 'block';
+      signupForm.style.display = 'none';
+      authTitle.innerText = 'Sign In';
+    } else {
+      console.log('Switching to Sign Up');
+      signinForm.style.display = 'none';
+      signupForm.style.display = 'block';
+      authTitle.innerText = 'Create Account';
+    }
+    
+    console.log('✅ Auth toggled successfully');
+    
+  } catch (error) {
+    console.error('❌ Toggle auth error:', error);
+    alert('Error toggling forms: ' + error.message);
   }
 }
 
@@ -376,9 +399,23 @@ function handleSignUp() {
   console.log('📝 Sign up initiated');
   
   try {
-    const email = document.getElementById('signupEmail').value.trim();
-    const password = document.getElementById('signupPassword').value;
-    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+    const emailInput = document.getElementById('signupEmail');
+    const passwordInput = document.getElementById('signupPassword');
+    const confirmPasswordInput = document.getElementById('signupConfirmPassword');
+    
+    console.log('Input elements:', {emailInput, passwordInput, confirmPasswordInput});
+    
+    if (!emailInput || !passwordInput || !confirmPasswordInput) {
+      console.error('❌ One or more input elements not found!');
+      alert('Error: Form inputs not found. Please refresh the page.');
+      return;
+    }
+    
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    
+    console.log('Form values:', {email, passwordLength: password.length, confirmPasswordLength: confirmPassword.length});
     
     // Validation
     if (!email) {
@@ -408,6 +445,8 @@ function handleSignUp() {
     
     // Check if user already exists
     const existingUser = load('user_' + email);
+    console.log('Existing user check:', existingUser);
+    
     if (existingUser) {
       alert('An account with this email already exists. Please sign in.');
       toggleAuth();
@@ -416,18 +455,23 @@ function handleSignUp() {
     
     // Create new user
     user.email = email;
-    user.password = btoa(password); // Basic encoding (for demo - in production use proper hashing)
+    user.password = btoa(password); // Basic encoding
     user.createdAt = new Date().toISOString();
     
     console.log('✅ Account created for:', email);
-    alert('Account created successfully! Let\'s set up your profile.');
+    console.log('User object:', user);
+    
+    alert('Account created successfully! Let us set up your profile.');
     
     // Start onboarding
+    console.log('Showing onboarding page...');
     show('onboardingPage');
+    console.log('Rendering first step...');
     renderStep();
     
   } catch (error) {
     console.error('❌ Sign up error:', error);
+    console.error('Error stack:', error.stack);
     alert('Error creating account: ' + error.message);
   }
 }
@@ -436,8 +480,21 @@ function handleSignIn() {
   console.log('🔐 Sign in initiated');
   
   try {
-    const email = document.getElementById('signinEmail').value.trim();
-    const password = document.getElementById('signinPassword').value;
+    const emailInput = document.getElementById('signinEmail');
+    const passwordInput = document.getElementById('signinPassword');
+    
+    console.log('Input elements:', {emailInput, passwordInput});
+    
+    if (!emailInput || !passwordInput) {
+      console.error('❌ Input elements not found!');
+      alert('Error: Form inputs not found. Please refresh the page.');
+      return;
+    }
+    
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    
+    console.log('Sign in attempt for:', email);
     
     // Validation
     if (!email) {
@@ -452,6 +509,7 @@ function handleSignIn() {
     
     // Check if user exists
     const savedUser = load('user_' + email);
+    console.log('Saved user:', savedUser);
     
     if (!savedUser) {
       alert('No account found with this email. Please sign up first.');
@@ -462,6 +520,8 @@ function handleSignIn() {
     const storedPassword = savedUser.password;
     const enteredPassword = btoa(password);
     
+    console.log('Password check:', {match: storedPassword === enteredPassword});
+    
     if (storedPassword !== enteredPassword) {
       alert('Incorrect password. Please try again.');
       return;
@@ -470,18 +530,21 @@ function handleSignIn() {
     // Successful login
     user = savedUser;
     console.log('✅ Signed in as:', email);
+    console.log('Onboarding complete:', savedUser.onboardingComplete);
     
     if (savedUser.onboardingComplete) {
+      console.log('Loading dashboard...');
       show('dashboardPage');
       loadDashboard();
     } else {
-      // Resume onboarding if not complete
+      console.log('Resuming onboarding...');
       show('onboardingPage');
       renderStep();
     }
     
   } catch (error) {
     console.error('❌ Sign in error:', error);
+    console.error('Error stack:', error.stack);
     alert('Error signing in: ' + error.message);
   }
 }
@@ -769,7 +832,7 @@ const steps = [
   I understand this is for informational purposes only and not medical advice
 </label>
 
-<button onclick="if(termsAgree.checked) finish(); else alert('Please agree to terms');">
+<button onclick="handleFinish()">
   Complete Setup 🎉
 </button>
 <button class="secondary" onclick="prev()">Back</button>
@@ -817,6 +880,40 @@ renderStep();
 }
 
 /* =============== CALCULATIONS =============== */
+function handleFinish() {
+console.log(‘🎉 === HANDLE FINISH CALLED ===’);
+console.log(‘Current step:’, step);
+console.log(‘Steps array length:’, steps.length);
+
+try {
+const termsCheckbox = document.getElementById(‘termsAgree’);
+console.log(‘Terms checkbox element:’, termsCheckbox);
+
+```
+if (!termsCheckbox) {
+  console.error('❌ Terms checkbox not found!');
+  alert('Error: Cannot find terms checkbox. Please refresh.');
+  return;
+}
+
+console.log('Terms checked:', termsCheckbox.checked);
+
+if (!termsCheckbox.checked) {
+  alert('Please agree to the terms to continue');
+  return;
+}
+
+console.log('✅ Terms agreed, calling finish()...');
+finish();
+```
+
+} catch (error) {
+console.error(‘❌ Error in handleFinish:’, error);
+console.error(‘Stack:’, error.stack);
+alert(’Error in handleFinish: ’ + error.message);
+}
+}
+
 function finish() {
 // Collect final step data
 user.injuries = document.getElementById(‘injuries’).value;
@@ -893,9 +990,26 @@ return “Push/Pull/Legs”;
 }
 
 function loadDashboard() {
+console.log(‘📊 Loading dashboard for user:’, user.email);
+
 const water = load(“water”)?.[today()] || 0;
 const currentWeight = latestWeight() || user.weight;
 const weightToGo = Math.abs(user.weight - user.goalWeight).toFixed(1);
+
+// Check if meal plan exists, generate if not
+let mealPlan = load(“mealPlan”);
+if (!mealPlan) {
+console.log(‘🍎 No meal plan found, generating…’);
+mealPlan = generateMealPlan();
+}
+
+// Check if workout plan exists, generate if not
+let workoutPlan = load(“workoutProgram”);
+if (!workoutPlan || Object.keys(workoutPlan).length === 0) {
+console.log(‘💪 No workout plan found, generating…’);
+generateWorkoutPlan();
+workoutPlan = load(“workoutProgram”);
+}
 
 overview.innerHTML = `
 <div class="card">
@@ -936,9 +1050,39 @@ overview.innerHTML = `
     <div><strong class="small">To Go</strong><div style="font-size: 24px; color: #FF6B35;">${weightToGo}</div></div>
   </div>
 </div>
+
+<div class="card">
+  <h3>🎯 Your Plans</h3>
+  <p class="small">Your personalized plans are ready!</p>
+  <div style="display: grid; gap: 10px; margin-top: 15px;">
+    <button onclick="switchTab('nutrition'); document.querySelector('.nav button:nth-child(3)').click();" style="background: #4CAF50;">
+      🍎 View 28-Day Meal Plan
+    </button>
+    <button onclick="switchTab('workouts'); document.querySelector('.nav button:nth-child(4)').click();" style="background: #2196F3;">
+      💪 View ${getSplit()} Workout Program
+    </button>
+  </div>
+</div>
+
+<div class="card">
+  <h3>👤 Account</h3>
+  <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 10px 0;">
+    <strong>Email:</strong> ${user.email}
+  </div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+    <button class="secondary" onclick="switchTab('settings'); document.querySelector('.nav button:nth-child(6)').click();">
+      ⚙️ Settings
+    </button>
+    <button onclick="logout()" style="background: #dc3545;">
+      🚪 Logout
+    </button>
+  </div>
+</div>
 ```
 
 `;
+
+console.log(‘✅ Dashboard loaded successfully’);
 }
 
 function addWater(oz) {
@@ -1059,6 +1203,7 @@ const FOODS = [
 {n:“Chicken Breast”,p:31,c:0,f:3,u:“4oz”},
 {n:“Lean Turkey”,p:22,c:0,f:8,u:“4oz”},
 {n:“Salmon”,p:22,c:0,f:12,u:“4oz”},
+{n:“Tuna”,p:25,c:0,f:1,u:“can”},
 {n:“Greek Yogurt”,p:17,c:6,f:0,u:“cup”},
 {n:“Brown Rice”,p:5,c:45,f:2,u:“cup”},
 {n:“Oats”,p:10,c:54,f:6,u:“cup”},
@@ -1067,6 +1212,7 @@ const FOODS = [
 {n:“Spinach”,p:2,c:4,f:0,u:“cup”},
 {n:“Avocado”,p:3,c:12,f:21,u:“whole”},
 {n:“Olive Oil”,p:0,c:0,f:14,u:“tbsp”},
+{n:“Almonds”,p:6,c:6,f:14,u:“oz”},
 {n:“Banana”,p:1,c:27,f:0,u:“medium”},
 {n:“Whey Protein”,p:24,c:3,f:1,u:“scoop”}
 ];
@@ -1074,41 +1220,105 @@ const FOODS = [
 const food = n => FOODS.find(f => f.n === n);
 
 const RECIPES = [
+// BREAKFAST - CUT (300-400 cal)
 {
 id:“egg_scramble”, meal:“breakfast”, goal:[“cut”,“maintain”],
 name:“Egg White Scramble”,
 ingredients:[{food:“Egg Whites”,s:1.5},{food:“Spinach”,s:1},{food:“Olive Oil”,s:0.25}],
-steps:[“Heat oil”,“Cook eggs”,“Add spinach”]
+steps:[“Heat oil in pan”,“Scramble egg whites”,“Add spinach”,“Cook until done”]
 },
+{
+id:“greek_oats”, meal:“breakfast”, goal:[“cut”,“maintain”],
+name:“Protein Oats”,
+ingredients:[{food:“Oats”,s:0.5},{food:“Greek Yogurt”,s:0.5},{food:“Banana”,s:0.5}],
+steps:[“Cook oats”,“Mix in yogurt”,“Top with banana”]
+},
+
+// BREAKFAST - MAINTAIN/BULK (400-600 cal)
 {
 id:“yogurt_bowl”, meal:“breakfast”, goal:[“maintain”,“bulk”],
-name:“Greek Yogurt Bowl”,
-ingredients:[{food:“Greek Yogurt”,s:1.5},{food:“Banana”,s:1}],
-steps:[“Layer yogurt”,“Top with banana”]
+name:“Greek Yogurt Power Bowl”,
+ingredients:[{food:“Greek Yogurt”,s:1.5},{food:“Oats”,s:0.5},{food:“Banana”,s:1},{food:“Almonds”,s:0.5}],
+steps:[“Layer yogurt in bowl”,“Add oats”,“Top with banana and almonds”]
 },
 {
-id:“chicken_rice”, meal:“lunch”, goal:[“cut”,“maintain”,“bulk”],
-name:“Chicken & Rice”,
-ingredients:[{food:“Chicken Breast”,s:1.5},{food:“Brown Rice”,s:1},{food:“Broccoli”,s:1}],
-steps:[“Grill chicken”,“Cook rice”,“Steam broccoli”,“Combine”]
+id:“protein_pancakes”, meal:“breakfast”, goal:[“maintain”,“bulk”],
+name:“Protein Pancakes”,
+ingredients:[{food:“Oats”,s:1},{food:“Egg Whites”,s:1},{food:“Banana”,s:1},{food:“Whey Protein”,s:0.5}],
+steps:[“Blend all ingredients”,“Heat pan”,“Cook pancakes 2 min each side”]
+},
+
+// LUNCH - CUT (400-500 cal)
+{
+id:“chicken_salad”, meal:“lunch”, goal:[“cut”],
+name:“Grilled Chicken Salad”,
+ingredients:[{food:“Chicken Breast”,s:1.5},{food:“Spinach”,s:2},{food:“Broccoli”,s:1},{food:“Olive Oil”,s:0.5}],
+steps:[“Grill chicken”,“Chop vegetables”,“Toss with oil”,“Season to taste”]
 },
 {
-id:“turkey_potato”, meal:“dinner”, goal:[“cut”,“maintain”,“bulk”],
+id:“tuna_bowl”, meal:“lunch”, goal:[“cut”],
+name:“Tuna Power Bowl”,
+ingredients:[{food:“Tuna”,s:2},{food:“Spinach”,s:2},{food:“Avocado”,s:0.5}],
+steps:[“Prepare tuna”,“Arrange spinach”,“Top with avocado”,“Add lemon”]
+},
+
+// LUNCH - MAINTAIN/BULK (500-700 cal)
+{
+id:“chicken_rice”, meal:“lunch”, goal:[“maintain”,“bulk”],
+name:“Chicken & Rice Bowl”,
+ingredients:[{food:“Chicken Breast”,s:1.5},{food:“Brown Rice”,s:1.5},{food:“Broccoli”,s:1},{food:“Olive Oil”,s:0.5}],
+steps:[“Grill chicken”,“Cook rice”,“Steam broccoli”,“Combine and drizzle oil”]
+},
+{
+id:“turkey_wrap”, meal:“lunch”, goal:[“maintain”,“bulk”],
 name:“Turkey & Sweet Potato”,
-ingredients:[{food:“Lean Turkey”,s:1.5},{food:“Sweet Potato”,s:2},{food:“Spinach”,s:1}],
-steps:[“Brown turkey”,“Roast potato”,“Sauté spinach”]
+ingredients:[{food:“Lean Turkey”,s:1.5},{food:“Sweet Potato”,s:2},{food:“Spinach”,s:1},{food:“Olive Oil”,s:0.5}],
+steps:[“Brown turkey”,“Roast sweet potatoes”,“Sauté spinach”,“Combine”]
+},
+
+// DINNER - CUT (400-500 cal)
+{
+id:“salmon_light”, meal:“dinner”, goal:[“cut”],
+name:“Baked Salmon & Greens”,
+ingredients:[{food:“Salmon”,s:1},{food:“Broccoli”,s:2},{food:“Spinach”,s:1},{food:“Olive Oil”,s:0.5}],
+steps:[“Season salmon”,“Bake at 375°F for 15 min”,“Steam vegetables”,“Drizzle with oil”]
 },
 {
-id:“salmon_veg”, meal:“dinner”, goal:[“maintain”,“bulk”],
-name:“Salmon & Veggies”,
-ingredients:[{food:“Salmon”,s:1.5},{food:“Broccoli”,s:1.5},{food:“Olive Oil”,s:0.5}],
-steps:[“Bake salmon”,“Steam broccoli”,“Drizzle oil”]
+id:“chicken_veg”, meal:“dinner”, goal:[“cut”,“maintain”],
+name:“Lemon Herb Chicken”,
+ingredients:[{food:“Chicken Breast”,s:1.5},{food:“Broccoli”,s:1.5},{food:“Sweet Potato”,s:1}],
+steps:[“Season chicken with lemon”,“Grill chicken”,“Roast vegetables”,“Serve”]
+},
+
+// DINNER - MAINTAIN/BULK (600-800 cal)
+{
+id:“salmon_dinner”, meal:“dinner”, goal:[“maintain”,“bulk”],
+name:“Salmon & Sweet Potato”,
+ingredients:[{food:“Salmon”,s:1.5},{food:“Sweet Potato”,s:2},{food:“Broccoli”,s:1},{food:“Olive Oil”,s:1}],
+steps:[“Season salmon”,“Bake at 375°F for 15 min”,“Roast sweet potatoes”,“Steam broccoli”,“Drizzle with oil”]
+},
+{
+id:“turkey_dinner”, meal:“dinner”, goal:[“maintain”,“bulk”],
+name:“Turkey Power Bowl”,
+ingredients:[{food:“Lean Turkey”,s:2},{food:“Brown Rice”,s:1.5},{food:“Avocado”,s:1},{food:“Spinach”,s:1}],
+steps:[“Brown turkey with seasonings”,“Cook rice”,“Sauté spinach”,“Top with avocado”]
+},
+{
+id:“chicken_potato”, meal:“dinner”, goal:[“maintain”,“bulk”],
+name:“Chicken & Roasted Veggies”,
+ingredients:[{food:“Chicken Breast”,s:2},{food:“Sweet Potato”,s:2},{food:“Broccoli”,s:1},{food:“Olive Oil”,s:1}],
+steps:[“Season chicken”,“Roast potatoes at 400°F”,“Grill chicken”,“Steam broccoli”,“Combine”]
 }
 ];
 
 function macros(recipe) {
 return recipe.ingredients.reduce((t, i) => {
 const f = food(i.food);
+if (!f) {
+console.error(`❌ Food not found: "${i.food}" in recipe "${recipe.name}"`);
+console.error(‘Available foods:’, FOODS.map(f => f.n));
+return t; // Skip this ingredient
+}
 t.p += f.p * i.s;
 t.c += f.c * i.s;
 t.f += f.f * i.s;
@@ -1117,24 +1327,93 @@ return t;
 }
 
 function generateMealPlan() {
+console.log(‘🍎 === MEAL PLAN GENERATION START ===’);
+console.log(‘🍎 User object:’, JSON.stringify(user, null, 2));
+console.log(‘🍎 Key values:’, {
+calories: user.calories,
+goal: user.goal,
+protein: user.macros?.protein,
+carbs: user.macros?.carbs,
+fats: user.macros?.fats,
+mealsPerDay: user.mealsPerDay
+});
+
+if (!user.calories || !user.goal || !user.macros) {
+console.error(‘❌ Missing required user data for meal plan!’);
+alert(‘Error: Missing metabolic data. Please complete onboarding again.’);
+return null;
+}
+
 const feedback = load(“feedback”) || {};
 const pool = RECIPES.filter(r => r.goal.includes(user.goal) && feedback[r.id] !== “dislike”);
 
+console.log(‘🍎 Recipe pool size:’, pool.length);
+console.log(‘🍎 Recipes:’, pool.map(r => r.name));
+
+// Calculate target calories per meal (with 10% flex)
+const mealsPerDay = user.mealsPerDay || 3;
+const targetPerMeal = Math.round(user.calories / mealsPerDay);
+const flexRange = targetPerMeal * 0.15; // 15% flexibility
+
+console.log(`📊 Target per meal: ${targetPerMeal} ± ${Math.round(flexRange)} cal`);
+
 const plan = [];
+
 for (let w = 0; w < 4; w++) {
 const week = [];
+
+```
 for (let d = 0; d < 7; d++) {
-const day = {};
-[“breakfast”, “lunch”, “dinner”].forEach(meal => {
-const opts = pool.filter(r => r.meal === meal);
-if (opts.length > 0) day[meal] = opts[Math.floor(Math.random() * opts.length)];
-});
-week.push(day);
+  const day = {};
+  let dailyTotals = {p: 0, c: 0, f: 0, cals: 0};
+  
+  ["breakfast", "lunch", "dinner"].forEach((mealType, mealIndex) => {
+    // Get options for this meal type
+    let opts = pool.filter(r => r.meal === mealType);
+    
+    // Calculate how many calories we need for remaining meals
+    const mealsLeft = 3 - mealIndex;
+    const calsRemaining = user.calories - dailyTotals.cals;
+    const targetForThisMeal = calsRemaining / mealsLeft;
+    
+    // Score each recipe by how close it is to our target
+    const scored = opts.map(recipe => {
+      const m = macros(recipe);
+      const cals = m.p * 4 + m.c * 4 + m.f * 9;
+      const diff = Math.abs(cals - targetForThisMeal);
+      return {recipe, cals, macros: m, score: diff};
+    });
+    
+    // Sort by best match (lowest difference)
+    scored.sort((a, b) => a.score - b.score);
+    
+    // Pick from top 3 to add variety
+    const topOptions = scored.slice(0, 3);
+    const chosen = topOptions[Math.floor(Math.random() * topOptions.length)];
+    
+    if (chosen) {
+      day[mealType] = chosen.recipe;
+      dailyTotals.p += chosen.macros.p;
+      dailyTotals.c += chosen.macros.c;
+      dailyTotals.f += chosen.macros.f;
+      dailyTotals.cals += chosen.cals;
+    }
+  });
+  
+  // Log daily totals for verification
+  console.log(`Day ${w + 1}.${d + 1} totals: ${Math.round(dailyTotals.cals)} cal (target: ${user.calories})`);
+  
+  week.push(day);
 }
+
 plan.push(week);
+```
+
 }
 
 save(“mealPlan”, plan);
+console.log(‘✅ Meal plan generated with’, plan.length, ‘weeks’);
+console.log(‘🍎 === MEAL PLAN GENERATION END ===’);
 return plan;
 }
 
@@ -1181,10 +1460,17 @@ nutrition.innerHTML += `<div class="week"><h3>Week ${i + 1}</h3>`;
 week.forEach((day, d) => {
   nutrition.innerHTML += `<h4 style="margin-top: 20px; color: #333;">Day ${d + 1}</h4>`;
   
+  let dailyTotals = {p: 0, c: 0, f: 0, cals: 0};
+  
   Object.values(day).forEach(recipe => {
     if (!recipe) return;
     const m = macros(recipe);
     const cals = Math.round(m.p * 4 + m.c * 4 + m.f * 9);
+    
+    dailyTotals.p += m.p;
+    dailyTotals.c += m.c;
+    dailyTotals.f += m.f;
+    dailyTotals.cals += cals;
     
     nutrition.innerHTML += `
       <div class="meal">
@@ -1203,6 +1489,44 @@ week.forEach((day, d) => {
       </div>
     `;
   });
+  
+  // Add daily summary
+  const targetDiff = Math.round(dailyTotals.cals - user.calories);
+  const diffColor = Math.abs(targetDiff) <= 100 ? '#4CAF50' : Math.abs(targetDiff) <= 200 ? '#FF9800' : '#f44336';
+  
+  nutrition.innerHTML += `
+    <div style="background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%); color: white; padding: 20px; border-radius: 12px; margin: 20px 0;">
+      <h4 style="color: white; margin: 0 0 10px 0;">📊 Day ${d + 1} Total</h4>
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center;">
+        <div>
+          <div style="font-size: 24px; font-weight: bold;">${Math.round(dailyTotals.cals)}</div>
+          <div style="font-size: 12px; opacity: 0.9;">Calories</div>
+          <div style="font-size: 11px; opacity: 0.7;">Target: ${user.calories}</div>
+        </div>
+        <div>
+          <div style="font-size: 24px; font-weight: bold;">${Math.round(dailyTotals.p)}g</div>
+          <div style="font-size: 12px; opacity: 0.9;">Protein</div>
+          <div style="font-size: 11px; opacity: 0.7;">Target: ${user.macros.protein}g</div>
+        </div>
+        <div>
+          <div style="font-size: 24px; font-weight: bold;">${Math.round(dailyTotals.c)}g</div>
+          <div style="font-size: 12px; opacity: 0.9;">Carbs</div>
+          <div style="font-size: 11px; opacity: 0.7;">Target: ${user.macros.carbs}g</div>
+        </div>
+        <div>
+          <div style="font-size: 24px; font-weight: bold;">${Math.round(dailyTotals.f)}g</div>
+          <div style="font-size: 12px; opacity: 0.9;">Fats</div>
+          <div style="font-size: 11px; opacity: 0.7;">Target: ${user.macros.fats}g</div>
+        </div>
+      </div>
+      <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; text-align: center;">
+        <span style="font-size: 14px; color: ${diffColor};">
+          ${targetDiff > 0 ? '+' : ''}${targetDiff} cal from target
+          ${Math.abs(targetDiff) <= 100 ? ' ✅ Great!' : Math.abs(targetDiff) <= 200 ? ' ⚠️ Close' : ' ❌ Adjust portions'}
+        </span>
+      </div>
+    </div>
+  `;
 });
 
 const g = grocery(week);
@@ -1225,13 +1549,264 @@ nutrition.innerHTML += `</div>`;
 }
 
 /* =============== WORKOUTS =============== */
+/* =============== EXERCISE DATABASE =============== */
+const EXERCISE_DB = {
+// COMPOUND MOVEMENTS
+“Barbell Squat”: {
+type: “compound”,
+muscle: “Legs (Quads, Glutes)”,
+sets: 4,
+reps: “8-12”,
+instructions: [
+“Stand with feet shoulder-width apart, bar on upper back”,
+“Keep chest up and core tight”,
+“Lower by bending knees and hips simultaneously”,
+“Go down until thighs are parallel to ground”,
+“Push through heels to return to starting position”
+],
+tips: “Keep knees tracking over toes, don’t let them cave inward”
+},
+“Deadlift”: {
+type: “compound”,
+muscle: “Back, Hamstrings, Glutes”,
+sets: 4,
+reps: “6-10”,
+instructions: [
+“Stand with feet hip-width apart, bar over mid-foot”,
+“Bend down and grip bar just outside legs”,
+“Keep back flat, chest up, shoulders back”,
+“Drive through heels, extending hips and knees”,
+“Stand fully upright, then lower bar with control”
+],
+tips: “Keep bar close to body throughout the movement”
+},
+“Bench Press”: {
+type: “compound”,
+muscle: “Chest, Shoulders, Triceps”,
+sets: 4,
+reps: “8-12”,
+instructions: [
+“Lie on bench, feet flat on floor”,
+“Grip bar slightly wider than shoulder-width”,
+“Unrack and lower bar to mid-chest”,
+“Keep elbows at 45-degree angle from body”,
+“Press bar up until arms are fully extended”
+],
+tips: “Keep shoulder blades retracted throughout”
+},
+“Overhead Press”: {
+type: “compound”,
+muscle: “Shoulders, Triceps”,
+sets: 4,
+reps: “8-12”,
+instructions: [
+“Stand with feet shoulder-width apart”,
+“Hold bar at shoulder height, hands just outside shoulders”,
+“Brace core and squeeze glutes”,
+“Press bar straight overhead until arms are locked”,
+“Lower with control back to shoulders”
+],
+tips: “Don’t lean back excessively - keep core tight”
+},
+“Barbell Row”: {
+type: “compound”,
+muscle: “Back, Biceps”,
+sets: 4,
+reps: “8-12”,
+instructions: [
+“Bend at hips with slight knee bend, back flat”,
+“Grip bar with hands shoulder-width apart”,
+“Pull bar to lower chest/upper abdomen”,
+“Squeeze shoulder blades together at top”,
+“Lower bar with control”
+],
+tips: “Keep torso stable - don’t use momentum”
+},
+“Pull-Ups”: {
+type: “compound”,
+muscle: “Back, Biceps”,
+sets: 3,
+reps: “6-10”,
+instructions: [
+“Hang from bar with hands shoulder-width apart”,
+“Start with arms fully extended”,
+“Pull yourself up until chin clears bar”,
+“Focus on pulling elbows down and back”,
+“Lower yourself with control”
+],
+tips: “If can’t do full pull-ups, use assisted machine or bands”
+},
+
+// LEG EXERCISES
+“Leg Press”: {
+type: “compound”,
+muscle: “Quads, Glutes”,
+sets: 3,
+reps: “10-15”,
+instructions: [
+“Sit in machine with feet shoulder-width on platform”,
+“Lower platform by bending knees to 90 degrees”,
+“Press through heels to extend legs”,
+“Don’t lock knees at top”,
+“Control the descent”
+],
+tips: “Keep lower back pressed against pad”
+},
+“Romanian Deadlift”: {
+type: “compound”,
+muscle: “Hamstrings, Glutes”,
+sets: 3,
+reps: “10-12”,
+instructions: [
+“Stand holding bar at hip level”,
+“Keep slight bend in knees”,
+“Push hips back, lowering bar down legs”,
+“Feel stretch in hamstrings”,
+“Drive hips forward to return to standing”
+],
+tips: “Keep bar close to legs throughout movement”
+},
+“Leg Curl”: {
+type: “isolation”,
+muscle: “Hamstrings”,
+sets: 3,
+reps: “12-15”,
+instructions: [
+“Lie face down on leg curl machine”,
+“Position pad just above ankles”,
+“Curl legs up toward glutes”,
+“Squeeze at top”,
+“Lower with control”
+],
+tips: “Don’t lift hips off pad”
+},
+“Calf Raises”: {
+type: “isolation”,
+muscle: “Calves”,
+sets: 4,
+reps: “15-20”,
+instructions: [
+“Stand on elevated surface with heels hanging off”,
+“Hold dumbbells or use machine for resistance”,
+“Lower heels below platform level”,
+“Push up onto toes as high as possible”,
+“Pause at top, then lower slowly”
+],
+tips: “Full range of motion is key for calf growth”
+},
+“Lunges”: {
+type: “compound”,
+muscle: “Quads, Glutes”,
+sets: 3,
+reps: “10-12 each leg”,
+instructions: [
+“Stand upright holding dumbbells”,
+“Step forward with one leg”,
+“Lower back knee toward ground”,
+“Front thigh should be parallel to floor”,
+“Push through front heel to return”
+],
+tips: “Keep torso upright throughout movement”
+},
+
+// CHEST EXERCISES  
+“Incline Press”: {
+type: “compound”,
+muscle: “Upper Chest, Shoulders”,
+sets: 3,
+reps: “8-12”,
+instructions: [
+“Set bench to 30-45 degree incline”,
+“Lie back with dumbbells at shoulder level”,
+“Press weights up and slightly together”,
+“Lower with control to chest level”,
+“Keep elbows at 45-degree angle”
+],
+tips: “Don’t arch back excessively”
+},
+“Dips”: {
+type: “compound”,
+muscle: “Chest, Triceps”,
+sets: 3,
+reps: “8-12”,
+instructions: [
+“Grip parallel bars, arms extended”,
+“Lean forward slightly for chest emphasis”,
+“Lower body by bending elbows to 90 degrees”,
+“Press back up to starting position”,
+“Keep core tight throughout”
+],
+tips: “More forward lean = more chest, upright = more triceps”
+},
+
+// BACK EXERCISES
+“Lat Pulldown”: {
+type: “compound”,
+muscle: “Lats, Biceps”,
+sets: 3,
+reps: “10-12”,
+instructions: [
+“Sit at lat pulldown machine”,
+“Grip bar wider than shoulder-width”,
+“Pull bar down to upper chest”,
+“Squeeze shoulder blades together”,
+“Return with control”
+],
+tips: “Focus on pulling with back, not arms”
+},
+“Face Pulls”: {
+type: “isolation”,
+muscle: “Rear Delts, Upper Back”,
+sets: 3,
+reps: “15-20”,
+instructions: [
+“Set cable at upper chest height”,
+“Grip rope attachment with thumbs up”,
+“Pull rope toward face”,
+“Separate hands at end, pulling past ears”,
+“Focus on squeezing rear delts”
+],
+tips: “Light weight, focus on form and squeeze”
+},
+
+// ARM EXERCISES
+“Barbell Curl”: {
+type: “isolation”,
+muscle: “Biceps”,
+sets: 3,
+reps: “10-12”,
+instructions: [
+“Stand with feet shoulder-width apart”,
+“Hold bar with underhand grip”,
+“Keep elbows at sides”,
+“Curl bar up to shoulders”,
+“Lower with control”
+],
+tips: “Don’t swing or use momentum”
+},
+“Tricep Dips”: {
+type: “isolation”,
+muscle: “Triceps”,
+sets: 3,
+reps: “10-15”,
+instructions: [
+“Use dip bars or bench”,
+“Keep body upright (not leaning forward)”,
+“Lower by bending elbows”,
+“Go down until elbows at 90 degrees”,
+“Press back up”
+],
+tips: “Keep elbows pointing back, not out”
+}
+};
+
 const EXERCISES = {
-fullbody: [“Squat”, “Bench Press”, “Deadlift”, “Overhead Press”, “Row”],
-upper: [“Bench Press”, “Row”, “Overhead Press”, “Pull-Ups”, “Dips”],
-lower: [“Squat”, “Deadlift”, “Leg Press”, “Leg Curl”, “Calf Raises”],
+fullbody: [“Barbell Squat”, “Bench Press”, “Deadlift”, “Overhead Press”, “Barbell Row”],
+upper: [“Bench Press”, “Barbell Row”, “Overhead Press”, “Pull-Ups”, “Dips”],
+lower: [“Barbell Squat”, “Deadlift”, “Leg Press”, “Leg Curl”, “Calf Raises”],
 push: [“Bench Press”, “Incline Press”, “Overhead Press”, “Tricep Dips”],
-pull: [“Deadlift”, “Pull-Ups”, “Barbell Row”, “Face Pulls”, “Curls”],
-legs: [“Squat”, “Leg Press”, “Leg Curl”, “Calf Raises”, “Lunges”]
+pull: [“Deadlift”, “Pull-Ups”, “Barbell Row”, “Face Pulls”, “Barbell Curl”],
+legs: [“Barbell Squat”, “Leg Press”, “Romanian Deadlift”, “Leg Curl”, “Lunges”]
 };
 
 function generateWorkoutPlan() {
@@ -1272,27 +1847,103 @@ program = load(“workoutProgram”);
 
 const logs = load(“workoutLogs”) || {};
 
-workouts.innerHTML = `<div class="card"> <h2>💪 ${getSplit()} Training</h2> <p class="small">${user.days} days/week</p> </div>`;
+workouts.innerHTML = `<div class="card"> <h2>💪 ${getSplit()} Training Program</h2> <p class="small">${user.workoutDays} days per week • Progressive overload recommended</p> </div>`;
 
 Object.keys(program).forEach(day => {
-workouts.innerHTML += `<div class="week"><h3>${day}</h3>`;
+workouts.innerHTML += `<div class="week"> <h3>${day} Day</h3> <p class="small">Complete all exercises, rest 60-90 seconds between sets</p>`;
 
 ```
-program[day].forEach(ex => {
-  const history = logs[ex] || [];
-  const last = history[history.length - 1];
+program[day].forEach((exerciseName, index) => {
+  const exercise = EXERCISE_DB[exerciseName];
+  
+  if (!exercise) {
+    console.warn(`Exercise not found in database: ${exerciseName}`);
+    return;
+  }
+  
+  const history = logs[exerciseName] || [];
+  const lastWorkout = history[history.length - 1];
   
   workouts.innerHTML += `
     <div class="exercise">
-      <div style="display: flex; justify-content: space-between;">
-        <strong style="font-size: 18px;">${ex}</strong>
-        ${last ? `<span class="small">Last: ${last.weight} lbs × ${last.reps}</span>` : ''}
+      <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+        <div>
+          <strong style="font-size: 20px; color: #FF6B35;">${index + 1}. ${exerciseName}</strong>
+          <div class="small" style="margin-top: 5px;">
+            <span style="background: #e3f2fd; padding: 4px 8px; border-radius: 5px; margin-right: 8px;">
+              ${exercise.type}
+            </span>
+            <span style="color: #666;">${exercise.muscle}</span>
+          </div>
+        </div>
+        ${lastWorkout ? `
+          <div style="text-align: right;">
+            <div class="small" style="color: #666;">Last Workout:</div>
+            <strong style="color: #4CAF50;">${lastWorkout.weight} lbs × ${lastWorkout.reps}</strong>
+          </div>
+        ` : ''}
       </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0;">
-        <input id="${day}_${ex}_w" type="number" placeholder="Weight">
-        <input id="${day}_${ex}_r" type="number" placeholder="Reps">
+      
+      <!-- TARGET SETS/REPS -->
+      <div style="background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%); color: white; padding: 15px; border-radius: 10px; margin: 15px 0;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
+          <div>
+            <div style="font-size: 28px; font-weight: bold;">${exercise.sets}</div>
+            <div style="font-size: 14px; opacity: 0.9;">SETS</div>
+          </div>
+          <div>
+            <div style="font-size: 28px; font-weight: bold;">${exercise.reps}</div>
+            <div style="font-size: 14px; opacity: 0.9;">REPS</div>
+          </div>
+        </div>
       </div>
-      <button class="small" onclick="logSet('${ex}','${day}')">Log Set</button>
+      
+      <!-- INSTRUCTIONS -->
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+        <h4 style="color: #FF6B35; margin: 0 0 10px 0;">How to Perform:</h4>
+        <ol style="margin: 0; padding-left: 20px;">
+          ${exercise.instructions.map(step => `<li style="margin-bottom: 8px; color: #333;">${step}</li>`).join('')}
+        </ol>
+        <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-top: 12px; border-left: 4px solid #ffc107;">
+          <strong style="color: #856404;">💡 Tip:</strong> <span style="color: #856404;">${exercise.tips}</span>
+        </div>
+      </div>
+      
+      <!-- LOG WORKOUT -->
+      <div style="background: white; padding: 15px; border-radius: 10px; margin: 15px 0;">
+        <h4 style="margin: 0 0 12px 0; color: #333;">📝 Log Your Sets</h4>
+        
+        <div id="${day}_${exerciseName}_sets" style="margin-bottom: 12px;">
+          <!-- Sets will be added here -->
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px;">
+          <input id="${day}_${exerciseName}_w" type="number" placeholder="Weight (lbs)" style="margin: 0;">
+          <input id="${day}_${exerciseName}_r" type="number" placeholder="Reps" style="margin: 0;">
+          <button class="small" onclick="logSet('${exerciseName}', '${day}')" style="margin: 0; min-width: 100px;">
+            + Add Set
+          </button>
+        </div>
+        
+        <textarea id="${day}_${exerciseName}_n" placeholder="Notes (optional)" rows="2" style="margin: 0;"></textarea>
+      </div>
+      
+      ${history.length > 0 ? `
+        <div style="margin-top: 15px;">
+          <h4 style="color: #666; font-size: 14px; margin-bottom: 10px;">📊 Recent History</h4>
+          <div style="max-height: 200px; overflow-y: auto;">
+            ${history.slice(-5).reverse().map(h => `
+              <div style="background: #f8f9fa; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 3px solid #4CAF50;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span class="small">${new Date(h.date).toLocaleDateString()}</span>
+                  <strong style="color: #4CAF50; font-size: 16px;">${h.weight} lbs × ${h.reps} reps</strong>
+                </div>
+                ${h.notes ? `<div class="small" style="margin-top: 5px; color: #666;">${h.notes}</div>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
     </div>
   `;
 });
@@ -1301,6 +1952,8 @@ workouts.innerHTML += `</div>`;
 ```
 
 });
+
+console.log(‘✅ Workouts rendered’);
 }
 
 function logSet(ex, day) {
@@ -1456,24 +2109,94 @@ alert(’Error changing password: ’ + error.message);
 }
 }
 
-function logout() {
-console.log(‘👋 Logging out’);
+// Wrapper function to ensure it’s accessible
+function handleLogout() {
+console.log(‘🚪 handleLogout called’);
+logout();
+}
 
-if (confirm(‘Are you sure you want to logout?’)) {
+function quickLogout() {
+console.log(‘🚪 Quick logout (no confirmation)’);
+
+alert(‘Logging you out…’);
+
 user = {};
 step = 0;
 localStorage.removeItem(‘lastEmail’);
 
-```
-// Clear forms
-document.getElementById('signinEmail').value = '';
-document.getElementById('signinPassword').value = '';
+show(‘loginPage’);
 
-show('loginPage');
-console.log('✅ Logged out successfully');
+setTimeout(() => {
+window.location.reload();
+}, 500);
+}
+
+function logout() {
+console.log(‘👋 === LOGOUT CALLED ===’);
+
+try {
+// Use custom modal instead of browser confirm
+showLogoutModal();
+} catch (error) {
+console.error(‘❌ Error during logout:’, error);
+console.error(‘Stack:’, error.stack);
+
+```
+// Force logout anyway
+user = {};
+localStorage.removeItem('lastEmail');
+window.location.reload();
 ```
 
 }
+}
+
+function showLogoutModal() {
+console.log(‘📋 Showing custom logout modal’);
+
+// Remove existing modal if any
+const existing = document.getElementById(‘logoutModal’);
+if (existing) existing.remove();
+
+// Create modal
+const modal = document.createElement(‘div’);
+modal.id = ‘logoutModal’;
+modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 10000;`;
+
+modal.innerHTML = `<div style="background: white; padding: 30px; border-radius: 20px; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);"> <h2 style="margin: 0 0 15px 0; color: #FF6B35;">🚪 Logout Confirmation</h2> <p style="margin: 0 0 25px 0; color: #666; font-size: 16px;">Are you sure you want to logout?</p> <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"> <button onclick="cancelLogout()" style="background: #6c757d; width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; font-size: 16px;"> Cancel </button> <button onclick="confirmLogout()" style="background: #dc3545; width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; font-size: 16px;"> Logout </button> </div> </div>`;
+
+document.body.appendChild(modal);
+}
+
+function cancelLogout() {
+console.log(‘❌ User cancelled logout’);
+const modal = document.getElementById(‘logoutModal’);
+if (modal) modal.remove();
+}
+
+function confirmLogout() {
+console.log(‘✅ User confirmed logout’);
+const modal = document.getElementById(‘logoutModal’);
+if (modal) modal.remove();
+
+// Perform logout
+user = {};
+step = 0;
+localStorage.removeItem(‘lastEmail’);
+
+// Clear form fields if they exist
+const signinEmail = document.getElementById(‘signinEmail’);
+const signinPassword = document.getElementById(‘signinPassword’);
+
+if (signinEmail) signinEmail.value = ‘’;
+if (signinPassword) signinPassword.value = ‘’;
+
+show(‘loginPage’);
+
+console.log(‘✅ Logged out successfully, reloading…’);
+setTimeout(() => {
+window.location.reload();
+}, 100);
 }
 
 function deleteAccount() {
@@ -1501,6 +2224,17 @@ console.log(‘✅ Account deleted’);
 }
 
 /* =============== INIT =============== */
+// Make critical functions globally accessible
+window.logout = logout;
+window.showLogoutModal = showLogoutModal;
+window.cancelLogout = cancelLogout;
+window.confirmLogout = confirmLogout;
+window.quickLogout = quickLogout;
+window.handleLogout = function() {
+console.log(‘🚪 handleLogout wrapper called’);
+logout();
+};
+
 window.onload = function() {
 const lastEmail = load(‘lastEmail’);
 if (lastEmail) {
