@@ -2235,6 +2235,18 @@ console.log(‘🚪 handleLogout wrapper called’);
 logout();
 };
 
+// Auth functions
+window.handleSignUp = handleSignUp;
+window.handleSignIn = handleSignIn;
+window.toggleAuth = toggleAuth;
+
+// Other critical functions
+window.handleFinish = handleFinish;
+window.finish = finish;
+window.next = next;
+window.prev = prev;
+window.renderStep = renderStep;
+
 window.onload = function() {
 const lastEmail = load(‘lastEmail’);
 if (lastEmail) {
