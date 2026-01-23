@@ -9,11 +9,16 @@
 <meta name="theme-color" content="#FF6B35">
 
 <script>
-// Define stub functions immediately so onclick handlers don't fail
-window.handleSignUp = function() { console.log('Script loading...'); };
-window.handleSignIn = function() { console.log('Script loading...'); };
-window.toggleAuth = function() { console.log('Script loading...'); };
-window.logout = function() { console.log('Script loading...'); };
+// Define stub functions with alerts to test
+window.handleSignUp = function() { alert('STUB handleSignUp - real function not loaded yet!'); };
+window.handleSignIn = function() { alert('STUB handleSignIn - real function not loaded yet!'); };
+window.toggleAuth = function() { alert('STUB toggleAuth - real function not loaded yet!'); };
+window.logout = function() { alert('STUB logout - real function not loaded yet!'); };
+
+console.log('=== STUB FUNCTIONS LOADED IN HEAD ===');
+console.log('handleSignUp type:', typeof window.handleSignUp);
+console.log('handleSignIn type:', typeof window.handleSignIn);
+console.log('toggleAuth type:', typeof window.toggleAuth);
 </script>
 
 <style>
@@ -405,6 +410,7 @@ function toggleAuth() {
 }
 // Make globally accessible IMMEDIATELY
 window.toggleAuth = toggleAuth;
+console.log('=== REAL toggleAuth LOADED ===');
 
 function handleSignUp() {
   alert('SIGNUP BUTTON CLICKED!'); // TEST
@@ -489,6 +495,7 @@ function handleSignUp() {
 }
 // Make globally accessible IMMEDIATELY
 window.handleSignUp = handleSignUp;
+console.log('=== REAL handleSignUp LOADED ===');
 
 function handleSignIn() {
   alert('SIGNIN BUTTON CLICKED!'); // TEST
@@ -565,6 +572,7 @@ function handleSignIn() {
 }
 // Make globally accessible IMMEDIATELY
 window.handleSignIn = handleSignIn;
+console.log('=== REAL handleSignIn LOADED ===');
 
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
