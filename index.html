@@ -1,0 +1,2274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>THE LAST COACH</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FF6B35">
+
+<script>
+// Define stub functions with alerts to test
+window.handleSignUp = function() { alert('STUB handleSignUp - real function not loaded yet!'); };
+window.handleSignIn = function() { alert('STUB handleSignIn - real function not loaded yet!'); };
+window.toggleAuth = function() { alert('STUB toggleAuth - real function not loaded yet!'); };
+window.logout = function() { alert('STUB logout - real function not loaded yet!'); };
+
+console.log('=== STUB FUNCTIONS LOADED IN HEAD ===');
+console.log('handleSignUp type:', typeof window.handleSignUp);
+console.log('handleSignIn type:', typeof window.handleSignIn);
+console.log('toggleAuth type:', typeof window.toggleAuth);
+</script>
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container { max-width: 1200px; margin: auto; }
+
+.card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 30px;
+  margin-bottom: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+h1, h2, h3, h4 { color: #FF6B35; margin-bottom: 15px; }
+h1 { font-size: 42px; }
+h2 { font-size: 28px; }
+h3 { font-size: 22px; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+button, .btn {
+  width: 100%;
+  padding: 18px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  margin-top: 10px;
+  min-height: 48px;
+}
+
+button:hover { transform: translateY(-2px); }
+button.secondary { background: #6c757d; }
+button.small { padding: 10px; font-size: 14px; width: auto; margin: 5px; }
+
+input, select, textarea {
+  width: 100%;
+  padding: 15px;
+  margin-top: 8px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+  font-size: 16px;
+  font-family: inherit;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #FF6B35;
+}
+
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.nav {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.nav button {
+  background: rgba(255,255,255,0.9);
+  color: #FF6B35;
+  padding: 15px 25px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.nav button.active {
+  background: white;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.tab { display: none; }
+.tab.active { display: block; }
+
+.meal, .exercise {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border-left: 4px solid #FF6B35;
+}
+
+.small { font-size: 14px; color: #666; }
+
+.week {
+  background: #ffe8df;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border-left: 6px solid #FF6B35;
+}
+
+.badge {
+  display: inline-block;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%);
+  color: white;
+  border-radius: 20px;
+  margin: 0 8px 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  margin: 20px 0;
+}
+
+.stat-box {
+  background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%);
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.stat-box strong {
+  display: block;
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+.progress-bar {
+  background: #e0e0e0;
+  height: 10px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.progress-fill {
+  background: linear-gradient(90deg, #FF6B35, #ff8c42);
+  height: 100%;
+  transition: width 0.3s;
+}
+
+.header {
+  text-align: center;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  color: white;
+  font-size: 48px;
+  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.assessment-card {
+  background: #ffe8df;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 20px 0;
+  border-left: 4px solid #FF6B35;
+}
+
+.assessment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.assessment-item {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.assessment-item strong {
+  color: #FF6B35;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.macro {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 8px;
+  margin-right: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.macro.protein { background: #ffebee; color: #c62828; }
+.macro.carbs { background: #e3f2fd; color: #1565c0; }
+.macro.fats { background: #f3e5f5; color: #6a1b9a; }
+
+.grocery-section {
+  background: #e3f2fd;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 15px;
+  border-left: 4px solid #2196F3;
+}
+
+.grocery-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: white;
+  margin-bottom: 8px;
+  border-radius: 8px;
+}
+
+.weight-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px;
+  background: white;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border-left: 3px solid #FF6B35;
+}
+
+@media (max-width: 768px) {
+  .card { padding: 20px; }
+  .header h1 { font-size: 36px; }
+  .grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="page active">
+  <div class="header">
+    <div style="font-size: 60px; margin-bottom: 15px;">💪</div>
+    <h1>THE LAST COACH</h1>
+    <p style="color: white; font-size: 18px;">Your complete fitness transformation system</p>
+  </div>
+  
+  <div class="card">
+    <h2 id="authTitle">Sign In</h2>
+    
+    <div id="signinForm">
+      <label>Email</label>
+      <input id="signinEmail" type="email" placeholder="your@email.com">
+      
+      <label>Password</label>
+      <input id="signinPassword" type="password" placeholder="Enter your password">
+      
+      <button onclick="handleSignIn()">Sign In 🚀</button>
+      <button class="secondary" onclick="toggleAuth()">Don't have an account? Sign Up</button>
+    </div>
+    
+    <div id="signupForm" style="display: none;">
+      <label>Email</label>
+      <input id="signupEmail" type="email" placeholder="your@email.com">
+      
+      <label>Password</label>
+      <input id="signupPassword" type="password" placeholder="Create a password (min 6 characters)">
+      
+      <label>Confirm Password</label>
+      <input id="signupConfirmPassword" type="password" placeholder="Re-enter your password">
+      
+      <button onclick="handleSignUp()">Create Account 🎉</button>
+      <button class="secondary" onclick="toggleAuth()">Already have an account? Sign In</button>
+    </div>
+  </div>
+</div>
+
+<!-- ONBOARDING PAGE -->
+<div id="onboardingPage" class="page">
+  <div class="header">
+    <h1>💪 Let's Build Your Plan</h1>
+    <p style="color: white;">Answer a few questions to personalize everything</p>
+  </div>
+  
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+  </div>
+  
+  <div class="card" id="onboardingCard"></div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div id="dashboardPage" class="page">
+  <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <h1 style="margin: 0;">THE LAST COACH 💪</h1>
+    <button class="secondary small" onclick="logout()" style="background: #dc3545; color: white; margin: 0;">
+      🚪 Logout
+    </button>
+  </div>
+
+  <div class="nav">
+    <button class="active" onclick="switchTab('overview')">📊 Dashboard</button>
+    <button onclick="switchTab('assessment')">📋 Assessment</button>
+    <button onclick="switchTab('nutrition')">🍎 Meal Plan</button>
+    <button onclick="switchTab('workouts')">💪 Workouts</button>
+    <button onclick="switchTab('tracking')">📈 Tracking</button>
+    <button onclick="switchTab('settings')">⚙️ Settings</button>
+  </div>
+
+  <div id="overview" class="tab active"></div>
+  <div id="assessment" class="tab"></div>
+  <div id="nutrition" class="tab"></div>
+  <div id="workouts" class="tab"></div>
+  <div id="tracking" class="tab"></div>
+  <div id="settings" class="tab"></div>
+</div>
+
+</div>
+
+<script>
+alert('🔥 MAIN SCRIPT LOADING NOW! 🔥');
+console.log('=== MAIN SCRIPT TAG STARTED ===');
+
+/* =============== STATE =============== */
+let user = {};
+let step = 0;
+
+const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+const load = k => JSON.parse(localStorage.getItem(k) || 'null');
+const today = () => new Date().toISOString().split('T')[0];
+
+/* =============== AUTHENTICATION =============== */
+function toggleAuth() {
+  alert('TOGGLE AUTH CLICKED!'); // TEST
+  console.log('🔄 Toggle auth clicked');
+  
+  try {
+    const signinForm = document.getElementById('signinForm');
+    const signupForm = document.getElementById('signupForm');
+    const authTitle = document.getElementById('authTitle');
+    
+    console.log('Form elements:', {signinForm, signupForm, authTitle});
+    
+    if (!signinForm || !signupForm || !authTitle) {
+      console.error('❌ Form elements not found!');
+      alert('Error: Forms not found. Please refresh the page.');
+      return;
+    }
+    
+    if (signinForm.style.display === 'none') {
+      console.log('Switching to Sign In');
+      signinForm.style.display = 'block';
+      signupForm.style.display = 'none';
+      authTitle.innerText = 'Sign In';
+    } else {
+      console.log('Switching to Sign Up');
+      signinForm.style.display = 'none';
+      signupForm.style.display = 'block';
+      authTitle.innerText = 'Create Account';
+    }
+    
+    console.log('✅ Auth toggled successfully');
+    
+  } catch (error) {
+    console.error('❌ Toggle auth error:', error);
+    alert('Error toggling forms: ' + error.message);
+  }
+}
+// Make globally accessible IMMEDIATELY
+window.toggleAuth = toggleAuth;
+console.log('=== REAL toggleAuth LOADED ===');
+
+function handleSignUp() {
+  alert('SIGNUP BUTTON CLICKED!'); // TEST
+  console.log('📝 Sign up initiated');
+  
+  try {
+    const emailInput = document.getElementById('signupEmail');
+    const passwordInput = document.getElementById('signupPassword');
+    const confirmPasswordInput = document.getElementById('signupConfirmPassword');
+    
+    console.log('Input elements:', {emailInput, passwordInput, confirmPasswordInput});
+    
+    if (!emailInput || !passwordInput || !confirmPasswordInput) {
+      console.error('❌ One or more input elements not found!');
+      alert('Error: Form inputs not found. Please refresh the page.');
+      return;
+    }
+    
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const confirmPassword = confirmPasswordInput.value;
+    
+    console.log('Form values:', {email, passwordLength: password.length, confirmPasswordLength: confirmPassword.length});
+    
+    // Validation
+    if (!email) {
+      alert('Please enter your email');
+      return;
+    }
+    
+    if (!isValidEmail(email)) {
+      alert('Please enter a valid email address');
+      return;
+    }
+    
+    if (!password) {
+      alert('Please enter a password');
+      return;
+    }
+    
+    if (password.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    // Check if user already exists
+    const existingUser = load('user_' + email);
+    console.log('Existing user check:', existingUser);
+    
+    if (existingUser) {
+      alert('An account with this email already exists. Please sign in.');
+      toggleAuth();
+      return;
+    }
+    
+    // Create new user
+    user.email = email;
+    user.password = btoa(password); // Basic encoding
+    user.createdAt = new Date().toISOString();
+    
+    console.log('✅ Account created for:', email);
+    console.log('User object:', user);
+    
+    alert('Account created successfully! Let us set up your profile.');
+    
+    // Start onboarding
+    console.log('Showing onboarding page...');
+    show('onboardingPage');
+    console.log('Rendering first step...');
+    renderStep();
+    
+  } catch (error) {
+    console.error('❌ Sign up error:', error);
+    console.error('Error stack:', error.stack);
+    alert('Error creating account: ' + error.message);
+  }
+}
+// Make globally accessible IMMEDIATELY
+window.handleSignUp = handleSignUp;
+console.log('=== REAL handleSignUp LOADED ===');
+
+function handleSignIn() {
+  alert('SIGNIN BUTTON CLICKED!'); // TEST
+  console.log('🔐 Sign in initiated');
+  
+  try {
+    const emailInput = document.getElementById('signinEmail');
+    const passwordInput = document.getElementById('signinPassword');
+    
+    console.log('Input elements:', {emailInput, passwordInput});
+    
+    if (!emailInput || !passwordInput) {
+      console.error('❌ Input elements not found!');
+      alert('Error: Form inputs not found. Please refresh the page.');
+      return;
+    }
+    
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    
+    console.log('Sign in attempt for:', email);
+    
+    // Validation
+    if (!email) {
+      alert('Please enter your email');
+      return;
+    }
+    
+    if (!password) {
+      alert('Please enter your password');
+      return;
+    }
+    
+    // Check if user exists
+    const savedUser = load('user_' + email);
+    console.log('Saved user:', savedUser);
+    
+    if (!savedUser) {
+      alert('No account found with this email. Please sign up first.');
+      return;
+    }
+    
+    // Verify password
+    const storedPassword = savedUser.password;
+    const enteredPassword = btoa(password);
+    
+    console.log('Password check:', {match: storedPassword === enteredPassword});
+    
+    if (storedPassword !== enteredPassword) {
+      alert('Incorrect password. Please try again.');
+      return;
+    }
+    
+    // Successful login
+    user = savedUser;
+    console.log('✅ Signed in as:', email);
+    console.log('Onboarding complete:', savedUser.onboardingComplete);
+    
+    if (savedUser.onboardingComplete) {
+      console.log('Loading dashboard...');
+      show('dashboardPage');
+      loadDashboard();
+    } else {
+      console.log('Resuming onboarding...');
+      show('onboardingPage');
+      renderStep();
+    }
+    
+  } catch (error) {
+    console.error('❌ Sign in error:', error);
+    console.error('Error stack:', error.stack);
+    alert('Error signing in: ' + error.message);
+  }
+}
+// Make globally accessible IMMEDIATELY
+window.handleSignIn = handleSignIn;
+console.log('=== REAL handleSignIn LOADED ===');
+
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+// Old login function removed - now using handleSignIn/handleSignUp
+
+function show(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+window.show = show;
+
+function switchTab(id) {
+  console.log('🔄 Switching to tab:', id);
+  
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  if (id === 'assessment') renderAssessment();
+  if (id === 'nutrition') renderNutrition();
+  if (id === 'workouts') renderWorkouts();
+  if (id === 'tracking') renderTracking();
+  if (id === 'settings') renderSettings();
+}
+
+/* =============== ONBOARDING =============== */
+const totalSteps = 8;
+
+const steps = [
+  // STEP 1: Basic Info
+  () => `
+    <h2>Step 1: Basic Information</h2>
+    <label>First Name</label>
+    <input id="name" placeholder="Enter your name" value="${user.name || ''}">
+    
+    <label>Age</label>
+    <input id="age" type="number" placeholder="25" value="${user.age || ''}">
+    
+    <label>Gender</label>
+    <select id="gender">
+      <option value="male" ${user.gender === 'male' ? 'selected' : ''}>Male</option>
+      <option value="female" ${user.gender === 'female' ? 'selected' : ''}>Female</option>
+    </select>
+    
+    <label>Height</label>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+      <input id="heightFeet" type="number" placeholder="5" value="${user.heightFeet || ''}" min="3" max="8">
+      <input id="heightInches" type="number" placeholder="10" value="${user.heightInches || ''}" min="0" max="11">
+    </div>
+    <p class="small">Feet and inches</p>
+    
+    <button onclick="next(() => {
+      user.name = name.value;
+      user.age = +age.value;
+      user.gender = gender.value;
+      user.heightFeet = +heightFeet.value;
+      user.heightInches = +heightInches.value;
+      user.height = (user.heightFeet * 12) + user.heightInches;
+    })">Continue</button>
+  `,
+  
+  // STEP 2: Current Fitness
+  () => `
+    <h2>Step 2: Current Fitness</h2>
+    <label>Current Weight (lbs)</label>
+    <input id="weight" type="number" placeholder="180" value="${user.weight || ''}" step="0.1">
+    
+    <label>Activity Level</label>
+    <select id="activityLevel">
+      <option value="sedentary">Sedentary (little to no exercise)</option>
+      <option value="light">Lightly Active (1-3 days/week)</option>
+      <option value="moderate" selected>Moderately Active (3-5 days/week)</option>
+      <option value="very">Very Active (6-7 days/week)</option>
+      <option value="extreme">Extremely Active (athlete)</option>
+    </select>
+    
+    <button onclick="next(() => {
+      user.weight = +weight.value;
+      user.activityLevel = activityLevel.value;
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  // STEP 3: Goals
+  () => `
+    <h2>Step 3: Your Goals</h2>
+    <label>Primary Goal</label>
+    <select id="primaryGoal">
+      <option value="weight-loss">🔥 Weight Loss</option>
+      <option value="muscle-gain">💪 Muscle Gain</option>
+      <option value="maintenance">⚖️ Maintain Weight</option>
+      <option value="athletic">🏃 Athletic Performance</option>
+    </select>
+    
+    <label>Goal Weight (lbs)</label>
+    <input id="goalWeight" type="number" placeholder="170" value="${user.goalWeight || ''}" step="0.1">
+    
+    <label>Timeline</label>
+    <select id="timeline">
+      <option value="3months">3 Months</option>
+      <option value="6months" selected>6 Months</option>
+      <option value="1year">1 Year</option>
+      <option value="ongoing">Ongoing Journey</option>
+    </select>
+    
+    <button onclick="next(() => {
+      user.primaryGoal = primaryGoal.value;
+      user.goalWeight = +goalWeight.value;
+      user.timeline = timeline.value;
+      user.goal = user.primaryGoal === 'weight-loss' ? 'cut' : user.primaryGoal === 'muscle-gain' ? 'bulk' : 'maintain';
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  // STEP 4: Workout Preferences
+  () => `
+    <h2>Step 4: Workout Preferences</h2>
+    <label>Training Days Per Week</label>
+    <input type="range" min="2" max="6" value="${user.workoutDays || 4}" id="workoutDays" 
+           oninput="wdDisplay.innerText = workoutDays.value + ' days/week'">
+    <div id="wdDisplay" style="text-align: center; font-size: 24px; font-weight: bold; color: #FF6B35; margin: 15px 0;">
+      ${user.workoutDays || 4} days/week
+    </div>
+    
+    <label>Workout Duration (minutes per session)</label>
+    <select id="workoutDuration">
+      <option value="30">30 minutes</option>
+      <option value="45" selected>45 minutes</option>
+      <option value="60">60 minutes</option>
+      <option value="90">90 minutes</option>
+    </select>
+    
+    <label>Workout Location (select all that apply)</label>
+    <select id="workoutLocations" multiple size="3" style="height: auto;">
+      <option value="home">🏠 Home</option>
+      <option value="gym">🏋️ Gym</option>
+      <option value="outdoor">🌳 Outdoor</option>
+    </select>
+    
+    <label>Available Equipment</label>
+    <select id="equipment" multiple size="5" style="height: auto;">
+      <option value="bodyweight">🤸 Bodyweight Only</option>
+      <option value="dumbbells">🏋️ Dumbbells</option>
+      <option value="barbells">💪 Barbells</option>
+      <option value="bands">🎀 Resistance Bands</option>
+      <option value="gym">🏢 Full Gym Access</option>
+    </select>
+    <p class="small">Hold Ctrl/Cmd to select multiple</p>
+    
+    <button onclick="next(() => {
+      user.workoutDays = +workoutDays.value;
+      user.days = user.workoutDays;
+      user.workoutDuration = +workoutDuration.value;
+      const locSelect = document.getElementById('workoutLocations');
+      user.workoutLocations = [...locSelect.selectedOptions].map(o => o.value);
+      const eqSelect = document.getElementById('equipment');
+      user.equipment = [...eqSelect.selectedOptions].map(o => o.value);
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  // STEP 5: Nutrition Preferences
+  () => `
+    <h2>Step 5: Nutrition Preferences</h2>
+    <label>Dietary Type</label>
+    <select id="dietType" multiple size="5" style="height: auto;">
+      <option value="none" selected>No Restrictions</option>
+      <option value="vegetarian">🥗 Vegetarian</option>
+      <option value="vegan">🌱 Vegan</option>
+      <option value="keto">🥑 Keto</option>
+      <option value="paleo">🥩 Paleo</option>
+    </select>
+    
+    <label>Meals Per Day</label>
+    <select id="mealsPerDay">
+      <option value="2">2 meals</option>
+      <option value="3" selected>3 meals</option>
+      <option value="4">4 meals</option>
+      <option value="5">5 meals</option>
+    </select>
+    
+    <label>Food Allergies / Restrictions (optional)</label>
+    <textarea id="allergies" rows="3" placeholder="e.g., nuts, dairy, gluten">${user.allergies || ''}</textarea>
+    
+    <button onclick="next(() => {
+      const dietSelect = document.getElementById('dietType');
+      user.diet = [...dietSelect.selectedOptions].map(o => o.value);
+      user.mealsPerDay = +mealsPerDay.value;
+      user.allergies = allergies.value;
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  // STEP 6: Lifestyle & Schedule
+  () => `
+    <h2>Step 6: Lifestyle & Schedule</h2>
+    <label>Work Schedule</label>
+    <select id="workSchedule">
+      <option value="9-5">9 AM - 5 PM</option>
+      <option value="flexible">Flexible Hours</option>
+      <option value="night">Night Shift</option>
+      <option value="irregular">Irregular Schedule</option>
+    </select>
+    
+    <label>Preferred Workout Times</label>
+    <select id="workoutTimes" multiple size="4" style="height: auto;">
+      <option value="early-morning">🌅 Early Morning (5-7 AM)</option>
+      <option value="morning">☀️ Morning (7-10 AM)</option>
+      <option value="afternoon">🌤️ Afternoon (12-3 PM)</option>
+      <option value="evening">🌆 Evening (5-8 PM)</option>
+    </select>
+    
+    <label>Average Sleep (hours per night)</label>
+    <input id="sleepHours" type="number" min="4" max="12" value="${user.sleepHours || 7}" step="0.5">
+    
+    <button onclick="next(() => {
+      user.workSchedule = workSchedule.value;
+      const wtSelect = document.getElementById('workoutTimes');
+      user.workoutTimes = [...wtSelect.selectedOptions].map(o => o.value);
+      user.sleepHours = +sleepHours.value;
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  // STEP 7: Motivation & Mindset
+  () => `
+    <h2>Step 7: Motivation & Mindset</h2>
+    <label>What motivates you most?</label>
+    <textarea id="motivation" rows="4" placeholder="Tell us what drives you to reach your fitness goals...">${user.motivation || ''}</textarea>
+    
+    <label>Biggest Barriers to Success</label>
+    <select id="barriers" multiple size="4" style="height: auto;">
+      <option value="time">⏰ Lack of Time</option>
+      <option value="motivation">😴 Low Motivation</option>
+      <option value="knowledge">📚 Not Sure What to Do</option>
+      <option value="accountability">👥 Need Accountability</option>
+    </select>
+    
+    <label>Learning Style</label>
+    <select id="learningStyle">
+      <option value="visual">👁️ Visual (videos, images)</option>
+      <option value="reading">📖 Reading (written instructions)</option>
+      <option value="doing">🤸 Hands-on (learn by doing)</option>
+    </select>
+    
+    <button onclick="next(() => {
+      user.motivation = motivation.value;
+      const barSelect = document.getElementById('barriers');
+      user.barriers = [...barSelect.selectedOptions].map(o => o.value);
+      user.learningStyle = learningStyle.value;
+    })">Continue</button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `,
+  
+  // STEP 8: Medical & Final
+  () => `
+    <h2>Step 8: Medical & Final Details</h2>
+    <label>Any Injuries or Physical Limitations?</label>
+    <textarea id="injuries" rows="3" placeholder="e.g., knee issues, back pain, etc.">${user.injuries || ''}</textarea>
+    
+    <label>Medical Conditions (optional)</label>
+    <textarea id="medicalConditions" rows="3" placeholder="e.g., diabetes, heart conditions, etc.">${user.medicalConditions || ''}</textarea>
+    
+    <label>Additional Notes</label>
+    <textarea id="additionalNotes" rows="3" placeholder="Anything else we should know?">${user.additionalNotes || ''}</textarea>
+    
+    <label>
+      <input type="checkbox" id="termsAgree" style="width: auto; margin-right: 10px;">
+      I understand this is for informational purposes only and not medical advice
+    </label>
+    
+    <button onclick="handleFinish()">
+      Complete Setup 🎉
+    </button>
+    <button class="secondary" onclick="prev()">Back</button>
+  `
+];
+
+function renderStep() {
+  console.log('📝 Rendering step:', step, 'of', totalSteps);
+  try {
+    document.getElementById('progressFill').style.width = ((step / totalSteps) * 100) + '%';
+    document.getElementById('onboardingCard').innerHTML = steps[step]();
+    console.log('✅ Step rendered successfully');
+  } catch (error) {
+    console.error('❌ Error rendering step:', error);
+    alert('Error rendering step: ' + error.message);
+  }
+}
+window.renderStep = renderStep;
+
+function next(fn) {
+  console.log('➡️ Next button clicked, current step:', step);
+  try {
+    if (fn) fn();
+    step++;
+    console.log('📈 Moving to step:', step);
+    if (step >= steps.length) {
+      console.log('🎉 Onboarding complete, calling finish()');
+      finish();
+    } else {
+      renderStep();
+    }
+  } catch (error) {
+    console.error('❌ Error in next():', error);
+    alert('Error: ' + error.message);
+  }
+}
+window.next = next;
+
+function prev() {
+  console.log('⬅️ Back button clicked, current step:', step);
+  step--;
+  if (step < 0) step = 0;
+  console.log('📉 Moving to step:', step);
+  renderStep();
+}
+window.prev = prev;
+
+/* =============== CALCULATIONS =============== */
+function handleFinish() {
+  console.log('🎉 === HANDLE FINISH CALLED ===');
+  console.log('Current step:', step);
+  console.log('Steps array length:', steps.length);
+  
+  try {
+    const termsCheckbox = document.getElementById('termsAgree');
+    console.log('Terms checkbox element:', termsCheckbox);
+    
+    if (!termsCheckbox) {
+      console.error('❌ Terms checkbox not found!');
+      alert('Error: Cannot find terms checkbox. Please refresh.');
+      return;
+    }
+    
+    console.log('Terms checked:', termsCheckbox.checked);
+    
+    if (!termsCheckbox.checked) {
+      alert('Please agree to the terms to continue');
+      return;
+    }
+    
+    console.log('✅ Terms agreed, calling finish()...');
+    finish();
+  } catch (error) {
+    console.error('❌ Error in handleFinish:', error);
+    console.error('Stack:', error.stack);
+    alert('Error in handleFinish: ' + error.message);
+  }
+}
+window.handleFinish = handleFinish;
+
+function finish() {
+  // Collect final step data
+  user.injuries = document.getElementById('injuries').value;
+  user.medicalConditions = document.getElementById('medicalConditions').value;
+  user.additionalNotes = document.getElementById('additionalNotes').value;
+  
+  console.log('📋 Complete user data:', user);
+  
+  // Calculate activity multiplier
+  const activityMultipliers = {
+    'sedentary': 1.2,
+    'light': 1.375,
+    'moderate': 1.55,
+    'very': 1.725,
+    'extreme': 1.9
+  };
+  
+  const activityMult = activityMultipliers[user.activityLevel] || 1.55;
+  
+  // BMR calculation (Mifflin-St Jeor)
+  const kg = user.weight * 0.453592;
+  const cm = user.height * 2.54;
+  const bmr = user.gender === "male"
+    ? 10 * kg + 6.25 * cm - 5 * user.age + 5
+    : 10 * kg + 6.25 * cm - 5 * user.age - 161;
+  
+  user.bmr = Math.round(bmr);
+  user.tdee = Math.round(bmr * activityMult);
+  
+  // Calculate calorie target based on goal
+  user.calories = user.goal === "cut" 
+    ? user.tdee - 500 
+    : user.goal === "bulk" 
+      ? user.tdee + 300 
+      : user.tdee;
+  
+  // Macro calculations
+  const macroRatios = {
+    cut: {p: 0.40, c: 0.30, f: 0.30},
+    maintain: {p: 0.30, c: 0.40, f: 0.30},
+    bulk: {p: 0.30, c: 0.50, f: 0.20}
+  };
+  
+  const ratio = macroRatios[user.goal] || macroRatios.maintain;
+  
+  user.macros = {
+    protein: Math.round((user.calories * ratio.p) / 4),
+    carbs: Math.round((user.calories * ratio.c) / 4),
+    fats: Math.round((user.calories * ratio.f) / 9)
+  };
+  
+  user.startDate = today();
+  user.onboardingComplete = true;
+  user.createdAt = new Date().toISOString();
+  
+  save('user_' + user.email, user);
+  console.log('✅ User data saved:', user);
+  
+  const mealPlan = generateMealPlan();
+  console.log('✅ Meal plan generated:', mealPlan);
+  
+  generateWorkoutPlan();
+  console.log('✅ Workout plan generated');
+  
+  show('dashboardPage');
+  loadDashboard();
+}
+
+/* =============== DASHBOARD =============== */
+function getSplit() {
+  if (user.days <= 3) return "Full Body";
+  if (user.days === 4) return "Upper/Lower";
+  return "Push/Pull/Legs";
+}
+
+function loadDashboard() {
+  console.log('📊 Loading dashboard for user:', user.email);
+  
+  const water = load("water")?.[today()] || 0;
+  const currentWeight = latestWeight() || user.weight;
+  const weightToGo = Math.abs(user.weight - user.goalWeight).toFixed(1);
+  
+  // Check if meal plan exists, generate if not
+  let mealPlan = load("mealPlan");
+  if (!mealPlan) {
+    console.log('🍎 No meal plan found, generating...');
+    mealPlan = generateMealPlan();
+  }
+  
+  // Check if workout plan exists, generate if not
+  let workoutPlan = load("workoutProgram");
+  if (!workoutPlan || Object.keys(workoutPlan).length === 0) {
+    console.log('💪 No workout plan found, generating...');
+    generateWorkoutPlan();
+    workoutPlan = load("workoutProgram");
+  }
+  
+  overview.innerHTML = `
+    <div class="card">
+      <h2>Welcome back, ${user.name}! 👋</h2>
+      <div>
+        <span class="badge">Started ${new Date(user.startDate).toLocaleDateString()}</span>
+        <span class="badge">${user.goal.toUpperCase()}</span>
+        <span class="badge">${getSplit()}</span>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="stat-box"><strong>${user.calories}</strong><span>Calories</span></div>
+      <div class="stat-box"><strong>${user.macros.protein}g</strong><span>Protein</span></div>
+      <div class="stat-box"><strong>${user.macros.carbs}g</strong><span>Carbs</span></div>
+      <div class="stat-box"><strong>${user.macros.fats}g</strong><span>Fats</span></div>
+    </div>
+
+    <div class="card">
+      <h3>💧 Water</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 32px; font-weight: bold; color: #FF6B35;" id="water">${water}</span>
+        <span>oz today</span>
+      </div>
+      <button class="small secondary" onclick="addWater(8)">+8 oz</button>
+    </div>
+
+    <div class="card">
+      <h3>⚖️ Weight</h3>
+      <div style="display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end;">
+        <input id="weightInput" type="number" step="0.1" placeholder="${currentWeight}">
+        <button class="small" onclick="logWeight()" style="width: auto;">Log</button>
+      </div>
+      <div style="margin-top: 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; text-align: center;">
+        <div><strong class="small">Current</strong><div style="font-size: 24px; color: #FF6B35;">${currentWeight}</div></div>
+        <div><strong class="small">Goal</strong><div style="font-size: 24px; color: #FF6B35;">${user.goalWeight}</div></div>
+        <div><strong class="small">To Go</strong><div style="font-size: 24px; color: #FF6B35;">${weightToGo}</div></div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h3>🎯 Your Plans</h3>
+      <p class="small">Your personalized plans are ready!</p>
+      <div style="display: grid; gap: 10px; margin-top: 15px;">
+        <button onclick="switchTab('nutrition'); document.querySelector('.nav button:nth-child(3)').click();" style="background: #4CAF50;">
+          🍎 View 28-Day Meal Plan
+        </button>
+        <button onclick="switchTab('workouts'); document.querySelector('.nav button:nth-child(4)').click();" style="background: #2196F3;">
+          💪 View ${getSplit()} Workout Program
+        </button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h3>👤 Account</h3>
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 10px 0;">
+        <strong>Email:</strong> ${user.email}
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+        <button class="secondary" onclick="switchTab('settings'); document.querySelector('.nav button:nth-child(6)').click();">
+          ⚙️ Settings
+        </button>
+        <button onclick="logout()" style="background: #dc3545;">
+          🚪 Logout
+        </button>
+      </div>
+    </div>
+  `;
+  
+  console.log('✅ Dashboard loaded successfully');
+}
+
+function addWater(oz) {
+  const w = load("water") || {};
+  w[today()] = (w[today()] || 0) + oz;
+  save("water", w);
+  document.getElementById("water").innerText = w[today()];
+}
+
+function logWeight() {
+  const v = +document.getElementById('weightInput').value;
+  if (!v) return alert('Enter weight');
+  const w = load("weights") || {};
+  w[today()] = v;
+  save("weights", w);
+  loadDashboard();
+}
+
+function latestWeight() {
+  const w = load("weights") || {};
+  const dates = Object.keys(w).sort();
+  return dates.length ? w[dates[dates.length - 1]] : null;
+}
+
+/* =============== ASSESSMENT =============== */
+function renderAssessment() {
+  assessment.innerHTML = `
+    <div class="card">
+      <h2>📋 Complete Assessment</h2>
+      <p class="small">Your personalized fitness profile from 8-step onboarding</p>
+    </div>
+
+    <div class="assessment-card">
+      <h3>👤 Personal Information</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Name</strong>${user.name}</div>
+        <div class="assessment-item"><strong>Age</strong>${user.age} years</div>
+        <div class="assessment-item"><strong>Gender</strong>${user.gender}</div>
+        <div class="assessment-item"><strong>Height</strong>${user.heightFeet}'${user.heightInches}"</div>
+      </div>
+    </div>
+
+    <div class="assessment-card">
+      <h3>💪 Current Fitness</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Current Weight</strong>${user.weight} lbs</div>
+        <div class="assessment-item"><strong>Activity Level</strong>${user.activityLevel}</div>
+        <div class="assessment-item"><strong>BMR</strong>${user.bmr || '--'} kcal</div>
+        <div class="assessment-item"><strong>TDEE</strong>${user.tdee} kcal</div>
+      </div>
+    </div>
+
+    <div class="assessment-card">
+      <h3>🎯 Goals & Timeline</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Primary Goal</strong>${user.primaryGoal}</div>
+        <div class="assessment-item"><strong>Goal Weight</strong>${user.goalWeight} lbs</div>
+        <div class="assessment-item"><strong>To Lose/Gain</strong>${Math.abs(user.weight - user.goalWeight).toFixed(1)} lbs</div>
+        <div class="assessment-item"><strong>Timeline</strong>${user.timeline}</div>
+      </div>
+    </div>
+
+    <div class="assessment-card">
+      <h3>🏋️ Workout Plan</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Days/Week</strong>${user.workoutDays} days</div>
+        <div class="assessment-item"><strong>Duration</strong>${user.workoutDuration} min/session</div>
+        <div class="assessment-item"><strong>Split</strong>${getSplit()}</div>
+        <div class="assessment-item"><strong>Locations</strong>${user.workoutLocations ? user.workoutLocations.join(', ') : 'N/A'}</div>
+      </div>
+      <div style="margin-top: 15px;">
+        <strong style="color: #FF6B35;">Equipment:</strong> ${user.equipment.join(', ')}
+      </div>
+    </div>
+
+    <div class="assessment-card">
+      <h3>🍎 Nutrition Plan</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Daily Calories</strong>${user.calories} kcal</div>
+        <div class="assessment-item"><strong>Protein</strong>${user.macros.protein}g (${Math.round((user.macros.protein * 4 / user.calories) * 100)}%)</div>
+        <div class="assessment-item"><strong>Carbs</strong>${user.macros.carbs}g (${Math.round((user.macros.carbs * 4 / user.calories) * 100)}%)</div>
+        <div class="assessment-item"><strong>Fats</strong>${user.macros.fats}g (${Math.round((user.macros.fats * 9 / user.calories) * 100)}%)</div>
+        <div class="assessment-item"><strong>Diet Type</strong>${user.diet.join(', ')}</div>
+        <div class="assessment-item"><strong>Meals/Day</strong>${user.mealsPerDay}</div>
+      </div>
+      ${user.allergies ? `<div style="margin-top: 15px;"><strong style="color: #FF6B35;">Allergies:</strong> ${user.allergies}</div>` : ''}
+    </div>
+
+    <div class="assessment-card">
+      <h3>⏰ Lifestyle & Schedule</h3>
+      <div class="assessment-grid">
+        <div class="assessment-item"><strong>Work Schedule</strong>${user.workSchedule}</div>
+        <div class="assessment-item"><strong>Sleep</strong>${user.sleepHours} hours/night</div>
+        <div class="assessment-item"><strong>Learning Style</strong>${user.learningStyle || 'N/A'}</div>
+      </div>
+      <div style="margin-top: 15px;">
+        <strong style="color: #FF6B35;">Preferred Workout Times:</strong> ${user.workoutTimes ? user.workoutTimes.join(', ') : 'N/A'}
+      </div>
+      ${user.barriers ? `<div style="margin-top: 10px;"><strong style="color: #FF6B35;">Barriers:</strong> ${user.barriers.join(', ')}</div>` : ''}
+    </div>
+
+    <div class="assessment-card">
+      <h3>💭 Motivation & Health</h3>
+      ${user.motivation ? `<div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><strong>Motivation:</strong><br>${user.motivation}</div>` : ''}
+      ${user.injuries ? `<div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><strong>Injuries/Limitations:</strong><br>${user.injuries}</div>` : ''}
+      ${user.medicalConditions ? `<div style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;"><strong>Medical Conditions:</strong><br>${user.medicalConditions}</div>` : ''}
+      ${user.additionalNotes ? `<div style="background: white; padding: 15px; border-radius: 8px;"><strong>Additional Notes:</strong><br>${user.additionalNotes}</div>` : ''}
+    </div>
+  `;
+}
+
+/* =============== FOOD & RECIPES =============== */
+const FOODS = [
+  {n:"Egg Whites",p:11,c:2,f:0,u:"cup"},
+  {n:"Chicken Breast",p:31,c:0,f:3,u:"4oz"},
+  {n:"Lean Turkey",p:22,c:0,f:8,u:"4oz"},
+  {n:"Salmon",p:22,c:0,f:12,u:"4oz"},
+  {n:"Tuna",p:25,c:0,f:1,u:"can"},
+  {n:"Greek Yogurt",p:17,c:6,f:0,u:"cup"},
+  {n:"Brown Rice",p:5,c:45,f:2,u:"cup"},
+  {n:"Oats",p:10,c:54,f:6,u:"cup"},
+  {n:"Sweet Potato",p:4,c:41,f:0,u:"medium"},
+  {n:"Broccoli",p:4,c:11,f:0,u:"cup"},
+  {n:"Spinach",p:2,c:4,f:0,u:"cup"},
+  {n:"Avocado",p:3,c:12,f:21,u:"whole"},
+  {n:"Olive Oil",p:0,c:0,f:14,u:"tbsp"},
+  {n:"Almonds",p:6,c:6,f:14,u:"oz"},
+  {n:"Banana",p:1,c:27,f:0,u:"medium"},
+  {n:"Whey Protein",p:24,c:3,f:1,u:"scoop"}
+];
+
+const food = n => FOODS.find(f => f.n === n);
+
+const RECIPES = [
+  // BREAKFAST - CUT (300-400 cal)
+  {
+    id:"egg_scramble", meal:"breakfast", goal:["cut","maintain"],
+    name:"Egg White Scramble",
+    ingredients:[{food:"Egg Whites",s:1.5},{food:"Spinach",s:1},{food:"Olive Oil",s:0.25}],
+    steps:["Heat oil in pan","Scramble egg whites","Add spinach","Cook until done"]
+  },
+  {
+    id:"greek_oats", meal:"breakfast", goal:["cut","maintain"],
+    name:"Protein Oats",
+    ingredients:[{food:"Oats",s:0.5},{food:"Greek Yogurt",s:0.5},{food:"Banana",s:0.5}],
+    steps:["Cook oats","Mix in yogurt","Top with banana"]
+  },
+  
+  // BREAKFAST - MAINTAIN/BULK (400-600 cal)
+  {
+    id:"yogurt_bowl", meal:"breakfast", goal:["maintain","bulk"],
+    name:"Greek Yogurt Power Bowl",
+    ingredients:[{food:"Greek Yogurt",s:1.5},{food:"Oats",s:0.5},{food:"Banana",s:1},{food:"Almonds",s:0.5}],
+    steps:["Layer yogurt in bowl","Add oats","Top with banana and almonds"]
+  },
+  {
+    id:"protein_pancakes", meal:"breakfast", goal:["maintain","bulk"],
+    name:"Protein Pancakes",
+    ingredients:[{food:"Oats",s:1},{food:"Egg Whites",s:1},{food:"Banana",s:1},{food:"Whey Protein",s:0.5}],
+    steps:["Blend all ingredients","Heat pan","Cook pancakes 2 min each side"]
+  },
+  
+  // LUNCH - CUT (400-500 cal)
+  {
+    id:"chicken_salad", meal:"lunch", goal:["cut"],
+    name:"Grilled Chicken Salad",
+    ingredients:[{food:"Chicken Breast",s:1.5},{food:"Spinach",s:2},{food:"Broccoli",s:1},{food:"Olive Oil",s:0.5}],
+    steps:["Grill chicken","Chop vegetables","Toss with oil","Season to taste"]
+  },
+  {
+    id:"tuna_bowl", meal:"lunch", goal:["cut"],
+    name:"Tuna Power Bowl",
+    ingredients:[{food:"Tuna",s:2},{food:"Spinach",s:2},{food:"Avocado",s:0.5}],
+    steps:["Prepare tuna","Arrange spinach","Top with avocado","Add lemon"]
+  },
+  
+  // LUNCH - MAINTAIN/BULK (500-700 cal)
+  {
+    id:"chicken_rice", meal:"lunch", goal:["maintain","bulk"],
+    name:"Chicken & Rice Bowl",
+    ingredients:[{food:"Chicken Breast",s:1.5},{food:"Brown Rice",s:1.5},{food:"Broccoli",s:1},{food:"Olive Oil",s:0.5}],
+    steps:["Grill chicken","Cook rice","Steam broccoli","Combine and drizzle oil"]
+  },
+  {
+    id:"turkey_wrap", meal:"lunch", goal:["maintain","bulk"],
+    name:"Turkey & Sweet Potato",
+    ingredients:[{food:"Lean Turkey",s:1.5},{food:"Sweet Potato",s:2},{food:"Spinach",s:1},{food:"Olive Oil",s:0.5}],
+    steps:["Brown turkey","Roast sweet potatoes","Sauté spinach","Combine"]
+  },
+  
+  // DINNER - CUT (400-500 cal)
+  {
+    id:"salmon_light", meal:"dinner", goal:["cut"],
+    name:"Baked Salmon & Greens",
+    ingredients:[{food:"Salmon",s:1},{food:"Broccoli",s:2},{food:"Spinach",s:1},{food:"Olive Oil",s:0.5}],
+    steps:["Season salmon","Bake at 375°F for 15 min","Steam vegetables","Drizzle with oil"]
+  },
+  {
+    id:"chicken_veg", meal:"dinner", goal:["cut","maintain"],
+    name:"Lemon Herb Chicken",
+    ingredients:[{food:"Chicken Breast",s:1.5},{food:"Broccoli",s:1.5},{food:"Sweet Potato",s:1}],
+    steps:["Season chicken with lemon","Grill chicken","Roast vegetables","Serve"]
+  },
+  
+  // DINNER - MAINTAIN/BULK (600-800 cal)
+  {
+    id:"salmon_dinner", meal:"dinner", goal:["maintain","bulk"],
+    name:"Salmon & Sweet Potato",
+    ingredients:[{food:"Salmon",s:1.5},{food:"Sweet Potato",s:2},{food:"Broccoli",s:1},{food:"Olive Oil",s:1}],
+    steps:["Season salmon","Bake at 375°F for 15 min","Roast sweet potatoes","Steam broccoli","Drizzle with oil"]
+  },
+  {
+    id:"turkey_dinner", meal:"dinner", goal:["maintain","bulk"],
+    name:"Turkey Power Bowl",
+    ingredients:[{food:"Lean Turkey",s:2},{food:"Brown Rice",s:1.5},{food:"Avocado",s:1},{food:"Spinach",s:1}],
+    steps:["Brown turkey with seasonings","Cook rice","Sauté spinach","Top with avocado"]
+  },
+  {
+    id:"chicken_potato", meal:"dinner", goal:["maintain","bulk"],
+    name:"Chicken & Roasted Veggies",
+    ingredients:[{food:"Chicken Breast",s:2},{food:"Sweet Potato",s:2},{food:"Broccoli",s:1},{food:"Olive Oil",s:1}],
+    steps:["Season chicken","Roast potatoes at 400°F","Grill chicken","Steam broccoli","Combine"]
+  }
+];
+
+function macros(recipe) {
+  return recipe.ingredients.reduce((t, i) => {
+    const f = food(i.food);
+    if (!f) {
+      console.error(`❌ Food not found: "${i.food}" in recipe "${recipe.name}"`);
+      console.error('Available foods:', FOODS.map(f => f.n));
+      return t; // Skip this ingredient
+    }
+    t.p += f.p * i.s;
+    t.c += f.c * i.s;
+    t.f += f.f * i.s;
+    return t;
+  }, {p:0, c:0, f:0});
+}
+
+function generateMealPlan() {
+  console.log('🍎 === MEAL PLAN GENERATION START ===');
+  console.log('🍎 User object:', JSON.stringify(user, null, 2));
+  console.log('🍎 Key values:', {
+    calories: user.calories,
+    goal: user.goal,
+    protein: user.macros?.protein,
+    carbs: user.macros?.carbs,
+    fats: user.macros?.fats,
+    mealsPerDay: user.mealsPerDay
+  });
+  
+  if (!user.calories || !user.goal || !user.macros) {
+    console.error('❌ Missing required user data for meal plan!');
+    alert('Error: Missing metabolic data. Please complete onboarding again.');
+    return null;
+  }
+  
+  const feedback = load("feedback") || {};
+  const pool = RECIPES.filter(r => r.goal.includes(user.goal) && feedback[r.id] !== "dislike");
+  
+  console.log('🍎 Recipe pool size:', pool.length);
+  console.log('🍎 Recipes:', pool.map(r => r.name));
+  
+  // Calculate target calories per meal (with 10% flex)
+  const mealsPerDay = user.mealsPerDay || 3;
+  const targetPerMeal = Math.round(user.calories / mealsPerDay);
+  const flexRange = targetPerMeal * 0.15; // 15% flexibility
+  
+  console.log(`📊 Target per meal: ${targetPerMeal} ± ${Math.round(flexRange)} cal`);
+  
+  const plan = [];
+  
+  for (let w = 0; w < 4; w++) {
+    const week = [];
+    
+    for (let d = 0; d < 7; d++) {
+      const day = {};
+      let dailyTotals = {p: 0, c: 0, f: 0, cals: 0};
+      
+      ["breakfast", "lunch", "dinner"].forEach((mealType, mealIndex) => {
+        // Get options for this meal type
+        let opts = pool.filter(r => r.meal === mealType);
+        
+        // Calculate how many calories we need for remaining meals
+        const mealsLeft = 3 - mealIndex;
+        const calsRemaining = user.calories - dailyTotals.cals;
+        const targetForThisMeal = calsRemaining / mealsLeft;
+        
+        // Score each recipe by how close it is to our target
+        const scored = opts.map(recipe => {
+          const m = macros(recipe);
+          const cals = m.p * 4 + m.c * 4 + m.f * 9;
+          const diff = Math.abs(cals - targetForThisMeal);
+          return {recipe, cals, macros: m, score: diff};
+        });
+        
+        // Sort by best match (lowest difference)
+        scored.sort((a, b) => a.score - b.score);
+        
+        // Pick from top 3 to add variety
+        const topOptions = scored.slice(0, 3);
+        const chosen = topOptions[Math.floor(Math.random() * topOptions.length)];
+        
+        if (chosen) {
+          day[mealType] = chosen.recipe;
+          dailyTotals.p += chosen.macros.p;
+          dailyTotals.c += chosen.macros.c;
+          dailyTotals.f += chosen.macros.f;
+          dailyTotals.cals += chosen.cals;
+        }
+      });
+      
+      // Log daily totals for verification
+      console.log(`Day ${w + 1}.${d + 1} totals: ${Math.round(dailyTotals.cals)} cal (target: ${user.calories})`);
+      
+      week.push(day);
+    }
+    
+    plan.push(week);
+  }
+  
+  save("mealPlan", plan);
+  console.log('✅ Meal plan generated with', plan.length, 'weeks');
+  console.log('🍎 === MEAL PLAN GENERATION END ===');
+  return plan;
+}
+
+function rate(id, val) {
+  const f = load("feedback") || {};
+  f[id] = val;
+  save("feedback", f);
+  generateMealPlan();
+  renderNutrition();
+}
+
+function grocery(week) {
+  const g = {};
+  week.forEach(day => {
+    Object.values(day).forEach(recipe => {
+      if (recipe) recipe.ingredients.forEach(i => g[i.food] = (g[i.food] || 0) + i.s);
+    });
+  });
+  return g;
+}
+
+function renderNutrition() {
+  console.log('📋 Rendering nutrition, user:', user);
+  
+  let plan = load("mealPlan");
+  console.log('📋 Loaded meal plan:', plan);
+  
+  if (!plan) {
+    console.log('📋 No meal plan found, generating...');
+    plan = generateMealPlan();
+  }
+  
+  if (!plan || plan.length === 0) {
+    nutrition.innerHTML = '<div class="card"><h2>⚠️ No meal plan generated</h2><p>Please complete onboarding first.</p></div>';
+    return;
+  }
+  
+  nutrition.innerHTML = `
+    <div class="card">
+      <h2>🍎 28-Day Meal Plan</h2>
+      <p class="small">Personalized for ${user.goal} • ${user.calories} cal/day</p>
+    </div>
+  `;
+  
+  plan.forEach((week, i) => {
+    nutrition.innerHTML += `<div class="week"><h3>Week ${i + 1}</h3>`;
+    
+    week.forEach((day, d) => {
+      nutrition.innerHTML += `<h4 style="margin-top: 20px; color: #333;">Day ${d + 1}</h4>`;
+      
+      let dailyTotals = {p: 0, c: 0, f: 0, cals: 0};
+      
+      Object.values(day).forEach(recipe => {
+        if (!recipe) return;
+        const m = macros(recipe);
+        const cals = Math.round(m.p * 4 + m.c * 4 + m.f * 9);
+        
+        dailyTotals.p += m.p;
+        dailyTotals.c += m.c;
+        dailyTotals.f += m.f;
+        dailyTotals.cals += cals;
+        
+        nutrition.innerHTML += `
+          <div class="meal">
+            <div style="display: flex; justify-content: space-between;">
+              <strong style="font-size: 18px;">${recipe.name}</strong>
+              <strong>${cals} cal</strong>
+            </div>
+            <div style="margin: 10px 0;">
+              <span class="macro protein">${Math.round(m.p)}P</span>
+              <span class="macro carbs">${Math.round(m.c)}C</span>
+              <span class="macro fats">${Math.round(m.f)}F</span>
+            </div>
+            <p class="small">${recipe.steps.join(" → ")}</p>
+            <button class="small" onclick="rate('${recipe.id}','like')">👍</button>
+            <button class="small secondary" onclick="rate('${recipe.id}','dislike')">👎</button>
+          </div>
+        `;
+      });
+      
+      // Add daily summary
+      const targetDiff = Math.round(dailyTotals.cals - user.calories);
+      const diffColor = Math.abs(targetDiff) <= 100 ? '#4CAF50' : Math.abs(targetDiff) <= 200 ? '#FF9800' : '#f44336';
+      
+      nutrition.innerHTML += `
+        <div style="background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%); color: white; padding: 20px; border-radius: 12px; margin: 20px 0;">
+          <h4 style="color: white; margin: 0 0 10px 0;">📊 Day ${d + 1} Total</h4>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; text-align: center;">
+            <div>
+              <div style="font-size: 24px; font-weight: bold;">${Math.round(dailyTotals.cals)}</div>
+              <div style="font-size: 12px; opacity: 0.9;">Calories</div>
+              <div style="font-size: 11px; opacity: 0.7;">Target: ${user.calories}</div>
+            </div>
+            <div>
+              <div style="font-size: 24px; font-weight: bold;">${Math.round(dailyTotals.p)}g</div>
+              <div style="font-size: 12px; opacity: 0.9;">Protein</div>
+              <div style="font-size: 11px; opacity: 0.7;">Target: ${user.macros.protein}g</div>
+            </div>
+            <div>
+              <div style="font-size: 24px; font-weight: bold;">${Math.round(dailyTotals.c)}g</div>
+              <div style="font-size: 12px; opacity: 0.9;">Carbs</div>
+              <div style="font-size: 11px; opacity: 0.7;">Target: ${user.macros.carbs}g</div>
+            </div>
+            <div>
+              <div style="font-size: 24px; font-weight: bold;">${Math.round(dailyTotals.f)}g</div>
+              <div style="font-size: 12px; opacity: 0.9;">Fats</div>
+              <div style="font-size: 11px; opacity: 0.7;">Target: ${user.macros.fats}g</div>
+            </div>
+          </div>
+          <div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; text-align: center;">
+            <span style="font-size: 14px; color: ${diffColor};">
+              ${targetDiff > 0 ? '+' : ''}${targetDiff} cal from target
+              ${Math.abs(targetDiff) <= 100 ? ' ✅ Great!' : Math.abs(targetDiff) <= 200 ? ' ⚠️ Close' : ' ❌ Adjust portions'}
+            </span>
+          </div>
+        </div>
+      `;
+    });
+    
+    const g = grocery(week);
+    nutrition.innerHTML += `
+      <div class="grocery-section">
+        <h4>🛒 Grocery List</h4>
+        ${Object.keys(g).map(k => `
+          <div class="grocery-item">
+            <span>${k}</span>
+            <strong>${g[k].toFixed(1)} ${food(k).u}</strong>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    
+    nutrition.innerHTML += `</div>`;
+  });
+}
+
+/* =============== WORKOUTS =============== */
+/* =============== EXERCISE DATABASE =============== */
+const EXERCISE_DB = {
+  // COMPOUND MOVEMENTS
+  "Barbell Squat": {
+    type: "compound",
+    muscle: "Legs (Quads, Glutes)",
+    sets: 4,
+    reps: "8-12",
+    instructions: [
+      "Stand with feet shoulder-width apart, bar on upper back",
+      "Keep chest up and core tight",
+      "Lower by bending knees and hips simultaneously",
+      "Go down until thighs are parallel to ground",
+      "Push through heels to return to starting position"
+    ],
+    tips: "Keep knees tracking over toes, don't let them cave inward"
+  },
+  "Deadlift": {
+    type: "compound",
+    muscle: "Back, Hamstrings, Glutes",
+    sets: 4,
+    reps: "6-10",
+    instructions: [
+      "Stand with feet hip-width apart, bar over mid-foot",
+      "Bend down and grip bar just outside legs",
+      "Keep back flat, chest up, shoulders back",
+      "Drive through heels, extending hips and knees",
+      "Stand fully upright, then lower bar with control"
+    ],
+    tips: "Keep bar close to body throughout the movement"
+  },
+  "Bench Press": {
+    type: "compound",
+    muscle: "Chest, Shoulders, Triceps",
+    sets: 4,
+    reps: "8-12",
+    instructions: [
+      "Lie on bench, feet flat on floor",
+      "Grip bar slightly wider than shoulder-width",
+      "Unrack and lower bar to mid-chest",
+      "Keep elbows at 45-degree angle from body",
+      "Press bar up until arms are fully extended"
+    ],
+    tips: "Keep shoulder blades retracted throughout"
+  },
+  "Overhead Press": {
+    type: "compound",
+    muscle: "Shoulders, Triceps",
+    sets: 4,
+    reps: "8-12",
+    instructions: [
+      "Stand with feet shoulder-width apart",
+      "Hold bar at shoulder height, hands just outside shoulders",
+      "Brace core and squeeze glutes",
+      "Press bar straight overhead until arms are locked",
+      "Lower with control back to shoulders"
+    ],
+    tips: "Don't lean back excessively - keep core tight"
+  },
+  "Barbell Row": {
+    type: "compound",
+    muscle: "Back, Biceps",
+    sets: 4,
+    reps: "8-12",
+    instructions: [
+      "Bend at hips with slight knee bend, back flat",
+      "Grip bar with hands shoulder-width apart",
+      "Pull bar to lower chest/upper abdomen",
+      "Squeeze shoulder blades together at top",
+      "Lower bar with control"
+    ],
+    tips: "Keep torso stable - don't use momentum"
+  },
+  "Pull-Ups": {
+    type: "compound",
+    muscle: "Back, Biceps",
+    sets: 3,
+    reps: "6-10",
+    instructions: [
+      "Hang from bar with hands shoulder-width apart",
+      "Start with arms fully extended",
+      "Pull yourself up until chin clears bar",
+      "Focus on pulling elbows down and back",
+      "Lower yourself with control"
+    ],
+    tips: "If can't do full pull-ups, use assisted machine or bands"
+  },
+  
+  // LEG EXERCISES
+  "Leg Press": {
+    type: "compound",
+    muscle: "Quads, Glutes",
+    sets: 3,
+    reps: "10-15",
+    instructions: [
+      "Sit in machine with feet shoulder-width on platform",
+      "Lower platform by bending knees to 90 degrees",
+      "Press through heels to extend legs",
+      "Don't lock knees at top",
+      "Control the descent"
+    ],
+    tips: "Keep lower back pressed against pad"
+  },
+  "Romanian Deadlift": {
+    type: "compound",
+    muscle: "Hamstrings, Glutes",
+    sets: 3,
+    reps: "10-12",
+    instructions: [
+      "Stand holding bar at hip level",
+      "Keep slight bend in knees",
+      "Push hips back, lowering bar down legs",
+      "Feel stretch in hamstrings",
+      "Drive hips forward to return to standing"
+    ],
+    tips: "Keep bar close to legs throughout movement"
+  },
+  "Leg Curl": {
+    type: "isolation",
+    muscle: "Hamstrings",
+    sets: 3,
+    reps: "12-15",
+    instructions: [
+      "Lie face down on leg curl machine",
+      "Position pad just above ankles",
+      "Curl legs up toward glutes",
+      "Squeeze at top",
+      "Lower with control"
+    ],
+    tips: "Don't lift hips off pad"
+  },
+  "Calf Raises": {
+    type: "isolation",
+    muscle: "Calves",
+    sets: 4,
+    reps: "15-20",
+    instructions: [
+      "Stand on elevated surface with heels hanging off",
+      "Hold dumbbells or use machine for resistance",
+      "Lower heels below platform level",
+      "Push up onto toes as high as possible",
+      "Pause at top, then lower slowly"
+    ],
+    tips: "Full range of motion is key for calf growth"
+  },
+  "Lunges": {
+    type: "compound",
+    muscle: "Quads, Glutes",
+    sets: 3,
+    reps: "10-12 each leg",
+    instructions: [
+      "Stand upright holding dumbbells",
+      "Step forward with one leg",
+      "Lower back knee toward ground",
+      "Front thigh should be parallel to floor",
+      "Push through front heel to return"
+    ],
+    tips: "Keep torso upright throughout movement"
+  },
+  
+  // CHEST EXERCISES  
+  "Incline Press": {
+    type: "compound",
+    muscle: "Upper Chest, Shoulders",
+    sets: 3,
+    reps: "8-12",
+    instructions: [
+      "Set bench to 30-45 degree incline",
+      "Lie back with dumbbells at shoulder level",
+      "Press weights up and slightly together",
+      "Lower with control to chest level",
+      "Keep elbows at 45-degree angle"
+    ],
+    tips: "Don't arch back excessively"
+  },
+  "Dips": {
+    type: "compound",
+    muscle: "Chest, Triceps",
+    sets: 3,
+    reps: "8-12",
+    instructions: [
+      "Grip parallel bars, arms extended",
+      "Lean forward slightly for chest emphasis",
+      "Lower body by bending elbows to 90 degrees",
+      "Press back up to starting position",
+      "Keep core tight throughout"
+    ],
+    tips: "More forward lean = more chest, upright = more triceps"
+  },
+  
+  // BACK EXERCISES
+  "Lat Pulldown": {
+    type: "compound",
+    muscle: "Lats, Biceps",
+    sets: 3,
+    reps: "10-12",
+    instructions: [
+      "Sit at lat pulldown machine",
+      "Grip bar wider than shoulder-width",
+      "Pull bar down to upper chest",
+      "Squeeze shoulder blades together",
+      "Return with control"
+    ],
+    tips: "Focus on pulling with back, not arms"
+  },
+  "Face Pulls": {
+    type: "isolation",
+    muscle: "Rear Delts, Upper Back",
+    sets: 3,
+    reps: "15-20",
+    instructions: [
+      "Set cable at upper chest height",
+      "Grip rope attachment with thumbs up",
+      "Pull rope toward face",
+      "Separate hands at end, pulling past ears",
+      "Focus on squeezing rear delts"
+    ],
+    tips: "Light weight, focus on form and squeeze"
+  },
+  
+  // ARM EXERCISES
+  "Barbell Curl": {
+    type: "isolation",
+    muscle: "Biceps",
+    sets: 3,
+    reps: "10-12",
+    instructions: [
+      "Stand with feet shoulder-width apart",
+      "Hold bar with underhand grip",
+      "Keep elbows at sides",
+      "Curl bar up to shoulders",
+      "Lower with control"
+    ],
+    tips: "Don't swing or use momentum"
+  },
+  "Tricep Dips": {
+    type: "isolation",
+    muscle: "Triceps",
+    sets: 3,
+    reps: "10-15",
+    instructions: [
+      "Use dip bars or bench",
+      "Keep body upright (not leaning forward)",
+      "Lower by bending elbows",
+      "Go down until elbows at 90 degrees",
+      "Press back up"
+    ],
+    tips: "Keep elbows pointing back, not out"
+  }
+};
+
+const EXERCISES = {
+  fullbody: ["Barbell Squat", "Bench Press", "Deadlift", "Overhead Press", "Barbell Row"],
+  upper: ["Bench Press", "Barbell Row", "Overhead Press", "Pull-Ups", "Dips"],
+  lower: ["Barbell Squat", "Deadlift", "Leg Press", "Leg Curl", "Calf Raises"],
+  push: ["Bench Press", "Incline Press", "Overhead Press", "Tricep Dips"],
+  pull: ["Deadlift", "Pull-Ups", "Barbell Row", "Face Pulls", "Barbell Curl"],
+  legs: ["Barbell Squat", "Leg Press", "Romanian Deadlift", "Leg Curl", "Lunges"]
+};
+
+function generateWorkoutPlan() {
+  let program = {};
+  
+  if (user.days <= 3) {
+    program = {
+      "Day A": EXERCISES.fullbody,
+      "Day B": EXERCISES.fullbody.reverse()
+    };
+  } else if (user.days === 4) {
+    program = {
+      "Upper": EXERCISES.upper,
+      "Lower": EXERCISES.lower
+    };
+  } else {
+    program = {
+      "Push": EXERCISES.push,
+      "Pull": EXERCISES.pull,
+      "Legs": EXERCISES.legs
+    };
+  }
+  
+  save("workoutProgram", program);
+}
+
+function renderWorkouts() {
+  console.log('💪 Rendering workouts, user:', user);
+  
+  let program = load("workoutProgram");
+  console.log('💪 Loaded workout program:', program);
+  
+  if (!program || Object.keys(program).length === 0) {
+    console.log('💪 No workout program found, generating...');
+    generateWorkoutPlan();
+    program = load("workoutProgram");
+  }
+  
+  const logs = load("workoutLogs") || {};
+  
+  workouts.innerHTML = `
+    <div class="card">
+      <h2>💪 ${getSplit()} Training Program</h2>
+      <p class="small">${user.workoutDays} days per week • Progressive overload recommended</p>
+    </div>
+  `;
+  
+  Object.keys(program).forEach(day => {
+    workouts.innerHTML += `
+      <div class="week">
+        <h3>${day} Day</h3>
+        <p class="small">Complete all exercises, rest 60-90 seconds between sets</p>
+    `;
+    
+    program[day].forEach((exerciseName, index) => {
+      const exercise = EXERCISE_DB[exerciseName];
+      
+      if (!exercise) {
+        console.warn(`Exercise not found in database: ${exerciseName}`);
+        return;
+      }
+      
+      const history = logs[exerciseName] || [];
+      const lastWorkout = history[history.length - 1];
+      
+      workouts.innerHTML += `
+        <div class="exercise">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+            <div>
+              <strong style="font-size: 20px; color: #FF6B35;">${index + 1}. ${exerciseName}</strong>
+              <div class="small" style="margin-top: 5px;">
+                <span style="background: #e3f2fd; padding: 4px 8px; border-radius: 5px; margin-right: 8px;">
+                  ${exercise.type}
+                </span>
+                <span style="color: #666;">${exercise.muscle}</span>
+              </div>
+            </div>
+            ${lastWorkout ? `
+              <div style="text-align: right;">
+                <div class="small" style="color: #666;">Last Workout:</div>
+                <strong style="color: #4CAF50;">${lastWorkout.weight} lbs × ${lastWorkout.reps}</strong>
+              </div>
+            ` : ''}
+          </div>
+          
+          <!-- TARGET SETS/REPS -->
+          <div style="background: linear-gradient(135deg, #FF6B35 0%, #1a1a1a 100%); color: white; padding: 15px; border-radius: 10px; margin: 15px 0;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: center;">
+              <div>
+                <div style="font-size: 28px; font-weight: bold;">${exercise.sets}</div>
+                <div style="font-size: 14px; opacity: 0.9;">SETS</div>
+              </div>
+              <div>
+                <div style="font-size: 28px; font-weight: bold;">${exercise.reps}</div>
+                <div style="font-size: 14px; opacity: 0.9;">REPS</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- INSTRUCTIONS -->
+          <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+            <h4 style="color: #FF6B35; margin: 0 0 10px 0;">How to Perform:</h4>
+            <ol style="margin: 0; padding-left: 20px;">
+              ${exercise.instructions.map(step => `<li style="margin-bottom: 8px; color: #333;">${step}</li>`).join('')}
+            </ol>
+            <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin-top: 12px; border-left: 4px solid #ffc107;">
+              <strong style="color: #856404;">💡 Tip:</strong> <span style="color: #856404;">${exercise.tips}</span>
+            </div>
+          </div>
+          
+          <!-- LOG WORKOUT -->
+          <div style="background: white; padding: 15px; border-radius: 10px; margin: 15px 0;">
+            <h4 style="margin: 0 0 12px 0; color: #333;">📝 Log Your Sets</h4>
+            
+            <div id="${day}_${exerciseName}_sets" style="margin-bottom: 12px;">
+              <!-- Sets will be added here -->
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 10px;">
+              <input id="${day}_${exerciseName}_w" type="number" placeholder="Weight (lbs)" style="margin: 0;">
+              <input id="${day}_${exerciseName}_r" type="number" placeholder="Reps" style="margin: 0;">
+              <button class="small" onclick="logSet('${exerciseName}', '${day}')" style="margin: 0; min-width: 100px;">
+                + Add Set
+              </button>
+            </div>
+            
+            <textarea id="${day}_${exerciseName}_n" placeholder="Notes (optional)" rows="2" style="margin: 0;"></textarea>
+          </div>
+          
+          ${history.length > 0 ? `
+            <div style="margin-top: 15px;">
+              <h4 style="color: #666; font-size: 14px; margin-bottom: 10px;">📊 Recent History</h4>
+              <div style="max-height: 200px; overflow-y: auto;">
+                ${history.slice(-5).reverse().map(h => `
+                  <div style="background: #f8f9fa; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 3px solid #4CAF50;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <span class="small">${new Date(h.date).toLocaleDateString()}</span>
+                      <strong style="color: #4CAF50; font-size: 16px;">${h.weight} lbs × ${h.reps} reps</strong>
+                    </div>
+                    ${h.notes ? `<div class="small" style="margin-top: 5px; color: #666;">${h.notes}</div>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    });
+    
+    workouts.innerHTML += `</div>`;
+  });
+  
+  console.log('✅ Workouts rendered');
+}
+
+function logSet(ex, day) {
+  const w = document.getElementById(`${day}_${ex}_w`).value;
+  const r = document.getElementById(`${day}_${ex}_r`).value;
+  if (!w || !r) return alert('Enter weight and reps');
+  
+  const logs = load("workoutLogs") || {};
+  logs[ex] = logs[ex] || [];
+  logs[ex].push({date: today(), weight: w, reps: r});
+  save("workoutLogs", logs);
+  renderWorkouts();
+}
+
+/* =============== TRACKING =============== */
+function renderTracking() {
+  const weights = load("weights") || {};
+  const water = load("water") || {};
+  
+  const weightEntries = Object.entries(weights).sort().reverse().slice(0, 10);
+  const waterEntries = Object.entries(water).sort().reverse().slice(0, 7);
+  
+  tracking.innerHTML = `
+    <div class="card">
+      <h2>📈 Progress Tracking</h2>
+    </div>
+    
+    <div class="week">
+      <h3>⚖️ Weight History</h3>
+      ${weightEntries.length > 0 ? weightEntries.map(([date, weight]) => `
+        <div class="weight-entry">
+          <span>${date}</span>
+          <strong style="color: #FF6B35;">${weight} lbs</strong>
+        </div>
+      `).join('') : '<p class="small">No weight logs yet</p>'}
+    </div>
+    
+    <div class="week">
+      <h3>💧 Water Intake</h3>
+      ${waterEntries.length > 0 ? waterEntries.map(([date, oz]) => `
+        <div style="background: white; padding: 12px; margin-bottom: 8px; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+            <span>${date}</span>
+            <strong style="color: #FF6B35;">${oz} oz</strong>
+          </div>
+          <div class="progress-bar" style="margin: 0;">
+            <div class="progress-fill" style="width: ${Math.min(oz, 100)}%"></div>
+          </div>
+        </div>
+      `).join('') : '<p class="small">No water logs yet</p>'}
+    </div>
+  `;
+}
+
+/* =============== SETTINGS =============== */
+function renderSettings() {
+  settings.innerHTML = `
+    <div class="card">
+      <h2>⚙️ Account Settings</h2>
+      <p class="small">Manage your account and preferences</p>
+    </div>
+
+    <div class="card">
+      <h3>👤 Account Information</h3>
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+        <strong>Email:</strong> ${user.email}
+      </div>
+      <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+        <strong>Member Since:</strong> ${new Date(user.createdAt).toLocaleDateString()}
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>🔐 Change Password</h3>
+      <label>Current Password</label>
+      <input id="currentPassword" type="password" placeholder="Enter current password">
+      
+      <label>New Password</label>
+      <input id="newPassword" type="password" placeholder="Enter new password (min 6 characters)">
+      
+      <label>Confirm New Password</label>
+      <input id="confirmNewPassword" type="password" placeholder="Re-enter new password">
+      
+      <button onclick="changePassword()">Update Password</button>
+    </div>
+
+    <div class="card">
+      <h3>🗑️ Account Actions</h3>
+      <button class="secondary" onclick="logout()">Logout</button>
+      <button class="secondary" onclick="if(confirm('Are you sure? This will delete all your data.')) deleteAccount()" style="background: #dc3545; margin-top: 20px;">
+        Delete Account
+      </button>
+    </div>
+  `;
+}
+
+function changePassword() {
+  console.log('🔐 Changing password');
+  
+  try {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+    
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      alert('Please fill in all password fields');
+      return;
+    }
+    
+    // Verify current password
+    const storedPassword = user.password;
+    const enteredPassword = btoa(currentPassword);
+    
+    if (storedPassword !== enteredPassword) {
+      alert('Current password is incorrect');
+      return;
+    }
+    
+    if (newPassword.length < 6) {
+      alert('New password must be at least 6 characters');
+      return;
+    }
+    
+    if (newPassword !== confirmNewPassword) {
+      alert('New passwords do not match');
+      return;
+    }
+    
+    // Update password
+    user.password = btoa(newPassword);
+    save('user_' + user.email, user);
+    
+    alert('Password updated successfully!');
+    
+    // Clear fields
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmNewPassword').value = '';
+    
+    console.log('✅ Password changed successfully');
+    
+  } catch (error) {
+    console.error('❌ Password change error:', error);
+    alert('Error changing password: ' + error.message);
+  }
+}
+
+// Wrapper function to ensure it's accessible
+function handleLogout() {
+  console.log('🚪 handleLogout called');
+  logout();
+}
+
+function quickLogout() {
+  console.log('🚪 Quick logout (no confirmation)');
+  
+  alert('Logging you out...');
+  
+  user = {};
+  step = 0;
+  localStorage.removeItem('lastEmail');
+  
+  show('loginPage');
+  
+  setTimeout(() => {
+    window.location.reload();
+  }, 500);
+}
+
+function logout() {
+  console.log('👋 === LOGOUT CALLED ===');
+  
+  try {
+    // Use custom modal instead of browser confirm
+    showLogoutModal();
+  } catch (error) {
+    console.error('❌ Error during logout:', error);
+    console.error('Stack:', error.stack);
+    
+    // Force logout anyway
+    user = {};
+    localStorage.removeItem('lastEmail');
+    window.location.reload();
+  }
+}
+window.logout = logout;
+
+function showLogoutModal() {
+  console.log('📋 Showing custom logout modal');
+  
+  // Remove existing modal if any
+  const existing = document.getElementById('logoutModal');
+  if (existing) existing.remove();
+  
+  // Create modal
+  const modal = document.createElement('div');
+  modal.id = 'logoutModal';
+  modal.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="background: white; padding: 30px; border-radius: 20px; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+      <h2 style="margin: 0 0 15px 0; color: #FF6B35;">🚪 Logout Confirmation</h2>
+      <p style="margin: 0 0 25px 0; color: #666; font-size: 16px;">Are you sure you want to logout?</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <button onclick="cancelLogout()" style="background: #6c757d; width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; font-size: 16px;">
+          Cancel
+        </button>
+        <button onclick="confirmLogout()" style="background: #dc3545; width: 100%; padding: 15px; border: none; border-radius: 10px; color: white; font-weight: 600; cursor: pointer; font-size: 16px;">
+          Logout
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+window.showLogoutModal = showLogoutModal;
+
+function cancelLogout() {
+  console.log('❌ User cancelled logout');
+  const modal = document.getElementById('logoutModal');
+  if (modal) modal.remove();
+}
+window.cancelLogout = cancelLogout;
+
+function confirmLogout() {
+  console.log('✅ User confirmed logout');
+  const modal = document.getElementById('logoutModal');
+  if (modal) modal.remove();
+  
+  // Perform logout
+  user = {};
+  step = 0;
+  localStorage.removeItem('lastEmail');
+  
+  // Clear form fields if they exist
+  const signinEmail = document.getElementById('signinEmail');
+  const signinPassword = document.getElementById('signinPassword');
+  
+  if (signinEmail) signinEmail.value = '';
+  if (signinPassword) signinPassword.value = '';
+  
+  show('loginPage');
+  
+  console.log('✅ Logged out successfully, reloading...');
+  setTimeout(() => {
+    window.location.reload();
+  }, 100);
+}
+window.confirmLogout = confirmLogout;
+
+function deleteAccount() {
+  console.log('🗑️ Deleting account');
+  
+  const email = user.email;
+  
+  // Delete all user data
+  localStorage.removeItem('user_' + email);
+  localStorage.removeItem('lastEmail');
+  localStorage.removeItem('mealPlan');
+  localStorage.removeItem('workoutProgram');
+  localStorage.removeItem('workoutLogs');
+  localStorage.removeItem('weights');
+  localStorage.removeItem('water');
+  localStorage.removeItem('feedback');
+  
+  alert('Your account and all data have been deleted.');
+  
+  user = {};
+  step = 0;
+  
+  show('loginPage');
+  console.log('✅ Account deleted');
+}
+
+/* =============== INIT =============== */
+// All critical functions have been attached to window object immediately after definition
+// This ensures they work even when called before window.onload
+
+window.onload = function() {
+  const lastEmail = load('lastEmail');
+  if (lastEmail) {
+    const savedUser = load('user_' + lastEmail);
+    if (savedUser && savedUser.onboardingComplete) {
+      document.getElementById('email').value = lastEmail;
+      user = savedUser;
+      show('dashboardPage');
+      loadDashboard();
+    }
+  }
+};
+
+window.addEventListener('beforeunload', () => {
+  if (user.email) save('lastEmail', user.email);
+});
+</script>
+</body>
+</html>
