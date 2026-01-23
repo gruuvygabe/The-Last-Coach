@@ -394,6 +394,8 @@ function toggleAuth() {
     alert('Error toggling forms: ' + error.message);
   }
 }
+// Make globally accessible IMMEDIATELY
+window.toggleAuth = toggleAuth;
 
 function handleSignUp() {
   console.log('📝 Sign up initiated');
@@ -475,6 +477,8 @@ function handleSignUp() {
     alert('Error creating account: ' + error.message);
   }
 }
+// Make globally accessible IMMEDIATELY
+window.handleSignUp = handleSignUp;
 
 function handleSignIn() {
   console.log('🔐 Sign in initiated');
@@ -548,6 +552,8 @@ function handleSignIn() {
     alert('Error signing in: ' + error.message);
   }
 }
+// Make globally accessible IMMEDIATELY
+window.handleSignIn = handleSignIn;
 
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -560,6 +566,7 @@ function show(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+window.show = show;
 
 function switchTab(id) {
   console.log('🔄 Switching to tab:', id);
@@ -852,6 +859,7 @@ console.error(‘❌ Error rendering step:’, error);
 alert(’Error rendering step: ’ + error.message);
 }
 }
+window.renderStep = renderStep;
 
 function next(fn) {
 console.log(‘➡️ Next button clicked, current step:’, step);
@@ -870,6 +878,7 @@ console.error(‘❌ Error in next():’, error);
 alert(’Error: ’ + error.message);
 }
 }
+window.next = next;
 
 function prev() {
 console.log(‘⬅️ Back button clicked, current step:’, step);
@@ -878,6 +887,7 @@ if (step < 0) step = 0;
 console.log(‘📉 Moving to step:’, step);
 renderStep();
 }
+window.prev = prev;
 
 /* =============== CALCULATIONS =============== */
 function handleFinish() {
@@ -913,6 +923,7 @@ console.error(‘Stack:’, error.stack);
 alert(’Error in handleFinish: ’ + error.message);
 }
 }
+window.handleFinish = handleFinish;
 
 function finish() {
 // Collect final step data
@@ -2150,6 +2161,7 @@ window.location.reload();
 
 }
 }
+window.logout = logout;
 
 function showLogoutModal() {
 console.log(‘📋 Showing custom logout modal’);
@@ -2167,12 +2179,14 @@ modal.innerHTML = `<div style="background: white; padding: 30px; border-radius: 
 
 document.body.appendChild(modal);
 }
+window.showLogoutModal = showLogoutModal;
 
 function cancelLogout() {
 console.log(‘❌ User cancelled logout’);
 const modal = document.getElementById(‘logoutModal’);
 if (modal) modal.remove();
 }
+window.cancelLogout = cancelLogout;
 
 function confirmLogout() {
 console.log(‘✅ User confirmed logout’);
@@ -2198,6 +2212,7 @@ setTimeout(() => {
 window.location.reload();
 }, 100);
 }
+window.confirmLogout = confirmLogout;
 
 function deleteAccount() {
 console.log(‘🗑️ Deleting account’);
@@ -2224,28 +2239,8 @@ console.log(‘✅ Account deleted’);
 }
 
 /* =============== INIT =============== */
-// Make critical functions globally accessible
-window.logout = logout;
-window.showLogoutModal = showLogoutModal;
-window.cancelLogout = cancelLogout;
-window.confirmLogout = confirmLogout;
-window.quickLogout = quickLogout;
-window.handleLogout = function() {
-console.log(‘🚪 handleLogout wrapper called’);
-logout();
-};
-
-// Auth functions
-window.handleSignUp = handleSignUp;
-window.handleSignIn = handleSignIn;
-window.toggleAuth = toggleAuth;
-
-// Other critical functions
-window.handleFinish = handleFinish;
-window.finish = finish;
-window.next = next;
-window.prev = prev;
-window.renderStep = renderStep;
+// All critical functions have been attached to window object immediately after definition
+// This ensures they work even when called before window.onload
 
 window.onload = function() {
 const lastEmail = load(‘lastEmail’);
