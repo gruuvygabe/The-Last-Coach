@@ -1,0 +1,45 @@
+{
+  "name": "The Last Coach - Your Complete Fitness System",
+  "short_name": "Last Coach",
+  "description": "Complete fitness coaching with personalized meal plans, workout programs, and progress tracking",
+  "start_url": "/the-last-coach/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#FF6B35",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%23FF6B35' width='512' height='512'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='300' fill='white'%3E💪%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect fill='%23FF6B35' width='512' height='512'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='300' fill='white'%3E💪%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle"],
+  "shortcuts": [
+    {
+      "name": "View Meal Plan",
+      "short_name": "Meals",
+      "description": "View your personalized meal plan",
+      "url": "/the-last-coach/#nutrition"
+    },
+    {
+      "name": "View Workouts",
+      "short_name": "Workouts",
+      "description": "View your workout program",
+      "url": "/the-last-coach/#workouts"
+    },
+    {
+      "name": "Track Progress",
+      "short_name": "Progress",
+      "description": "Upload photos and track progress",
+      "url": "/the-last-coach/#tracking"
+    }
+  ]
+}
